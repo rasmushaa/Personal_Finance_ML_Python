@@ -1,0 +1,30 @@
+{
+  "application": {
+    "window": "800x1000+1500+10",
+    "title": "Transaction Classifier"
+  },
+  "google_api": {
+    "default_sheet": "personal_finance_main",
+    "default_key": "/Users/rasmus/Ohjelmointi/KEYS/personal-finance-drive-secret.json"
+  },
+  "machine_learning": {},
+  "transaction_types": {
+    "expenditure_list": {
+      "0": "FOOD",
+      "1": "LIVING",
+      "2": "HEALTH",
+      "3": "COMMUTING",
+      "4": "HOUSEHOLD ITEMS",
+      "5": "HOBBIES",
+      "6": "CLOTHING",
+      "7": "TECHNOLOGY",
+      "8": "UNCATEGORIZED",
+      "9": "INVESTING"
+    },
+    "income_list": {
+      "10": "SALARY",
+      "11": "OTHER INCOME",
+      "12": "CAPITAL INCOME"
+    }
+  }
+}
