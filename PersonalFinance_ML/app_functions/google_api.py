@@ -8,11 +8,12 @@ Created on 4 Sep 2022
 
 
 import  gspread
+import  pandas as pd
 from    google.oauth2.service_account import Credentials
-from    error_handling import MyWarningError
+from utilis.error_handling import MyWarningError
 
 
-class Google_API():
+class GoogleAPI():
     
     def __init__(self):
         self._client = None
@@ -30,11 +31,14 @@ class Google_API():
             raise MyWarningError(msg, e, fatal=False)
         
         
-    def write_to_cloud(self, sheet: str):      
+    def write_to_cloud(self, sheet: str, df : type[pd.DataFrame]):  
+        if df.empty:
+            raise MyWarningError("DataFrame could not be saved to cloud! \nNo frame was selected...")    
         try: 
             google_sh = self._client.open(sheet)
             sheet1 = google_sh.get_worksheet(0)
             print(sheet1) 
+            print(df.head())
             
         except Exception as e:
             msg = "Writing to Google Drive failed"

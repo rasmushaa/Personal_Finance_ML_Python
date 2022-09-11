@@ -22,20 +22,26 @@ the main loop.
 
 class MyWarningError(Exception):
 
-    def __init__(self, note: str, error: type[Exception], fatal: bool):       
+    def __init__(self, note: str, error: type[Exception]=None, fatal: bool=False):       
         self.note       = note
         self.root_error = error
         self.fatal      = fatal
 
 
-    def __str__(self):             
-        error_class = self.root_error.__class__.__name__
-        error_msg   = str(self.root_error)    
+    def __str__(self):               
+         
         if self.fatal:
-            type = "A fatal error occurred!\n\n" 
+            fatality = "A fatal error occurred!\n\n" 
         else:
-            type = "Warning!\n\n"
-        msg = type + self.note + '\n\n' + error_class + '\n' + error_msg        
+            fatality = "Warning!\n\n"
+        
+        if self.root_error != None:
+            error_class = self.root_error.__class__.__name__
+            error_msg   = str(self.root_error) 
+            msg = fatality + self.note + '\n\n' + error_class + '\n' + error_msg             
+        else:
+            msg = fatality + self.note
+            
         return msg
     
     

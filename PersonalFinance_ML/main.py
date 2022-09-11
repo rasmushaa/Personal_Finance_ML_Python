@@ -7,9 +7,9 @@ Created on 19 Aug 2022
 
 
 
-from application import Application
+from user_interface import GUI
 
 
 if __name__ == "__main__":
-    root = Application()
+    root = GUI()
     root.mainloop()
