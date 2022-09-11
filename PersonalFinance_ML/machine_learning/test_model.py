@@ -13,6 +13,15 @@ import  os
 import  timeit
 
 
+'''
+Trained model can be tested manually in this module.
+Data is loaded from the path and transformed to used format
+in the app_functions.DataFrame.load_data(), which may be
+extended to accept new file formats for your own purposes.
+LIMIT shows you how curtain the model is about its predictions
+'''
+
+
 
 DATA_PATH   = "/Users/rasmus/Desktop/2022_Labeled.csv"
 MODEL_NAME  = "trained_model.pkl"

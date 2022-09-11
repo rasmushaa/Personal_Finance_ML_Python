@@ -18,6 +18,14 @@ from    skfeature.function.similarity_based     import  fisher_score
 from    sklearn.feature_selection               import  SelectKBest, chi2
 
 
+'''
+Data features can be studied in this module,
+and use to alter the model training function.
+Data is loaded from the path and transformed to used format
+in the app_functions.DataFrame.load_data(), which may be
+extended to accept new file formats for your own purposes.
+'''
+
 
 
 DATA_PATH = "/Users/rasmus/Desktop/2022_Labeled.csv"

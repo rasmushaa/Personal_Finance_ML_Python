@@ -13,10 +13,6 @@ import                      chardet
 import                      csv
 
 
-'''
-Automatically detects csv file encoding and separators
-and transforms those to Personal Finance DataFame -format
-'''
 
 '''
 You may increase capabilities of the software 

@@ -13,6 +13,17 @@ import  pandas                          as      pd
 from    google.oauth2.service_account   import  Credentials
 
 
+
+'''
+This module pushes the labeled data to Google sheets.
+In order to use this, a Google service account must be created,
+and a google sheet file shared to that account.
+Then, the account can be authorized using the secret key on 
+your local machine.
+References: https://www.youtube.com/watch?v=bu5wXjz2KvU&t=595s
+'''
+
+
 class GoogleAPI():
     
     def __init__(self):

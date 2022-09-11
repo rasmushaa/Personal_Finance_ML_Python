@@ -23,6 +23,16 @@ from sklearn.ensemble                   import  RandomForestClassifier
 from sklearn.metrics                    import  accuracy_score
 
 
+'''
+This module fits an optimized Random forest classifier 
+to predict a category of banking transaction.
+Data is loaded from the path and transformed to used format
+in the app_functions.DataFrame.load_data(), which may be
+extended to accept new file formats for your own purposes.
+The model will be saved into the files-folder.
+'''
+
+
 
 
 DATA_PATH           = "/Users/rasmus/Desktop/2022_Labeled.csv"
