@@ -7,9 +7,9 @@ Created on 10 Sep 2022
 
 
 
-from    app_functions.settings          import Settings
-from    app_functions.file_parsing      import  DataFrame
-from    app_functions.google_api        import  GoogleAPI
+from    app_functions import Settings
+from    app_functions import DataFrame
+from    app_functions import GoogleAPI
 
 
 

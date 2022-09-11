@@ -7,10 +7,10 @@ Created on 9 Sep 2022
 
 
 
-from utilis.error_handling import MyWarningError
-import pandas as pd
-import chardet
-import csv
+from    utilis      import  MyWarningError
+import  pandas      as      pd
+import                      chardet
+import                      csv
 
 
 '''
@@ -48,12 +48,14 @@ class DataFrame():
         return self._data_frame
     
     
-    def get_info(self) -> str:
-        msg = ("\n\nLocal path of DataFrame: " + self._local_path +
+    def get_info_str(self) -> str:
+        msg = ("Local path: " + self._local_path +
                 "\nData loaded from " + self._bank_file_type + "-file" +
                 "\nUsed separator: (" + self._separator + ") endoding: " + self._encoding +
-                "\nShape of the DataFrame: " + str(self._data_frame.shape) + 
-                "\nRows with NaNs:\n" + str(self._data_frame[self._data_frame.isna().any(axis=1)]))
+                "\n\nShape of the DataFrame: " + str(self._data_frame.shape) + 
+                "\n" + str(self._data_frame.head(10)) +
+                "\n\nRows with NaNs:\n" + str(self._data_frame[self._data_frame.isna().any(axis=1)]) +
+                "\n\n")
         return msg
     
     

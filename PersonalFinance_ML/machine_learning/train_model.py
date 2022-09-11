@@ -7,64 +7,50 @@ Created on 6 Sep 2022
 
 
 
-import pandas as pd
-import numpy as np
-import joblib
-from pprint import pprint
-from sklearn.model_selection import train_test_split
-from sklearn.model_selection import RandomizedSearchCV
-from sklearn.feature_selection import SelectKBest, chi2
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.pipeline import Pipeline
-from sklearn.compose import ColumnTransformer
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+from app_functions                      import  DataFrame
+import                                          pandas  as pd
+import                                          numpy   as np
+import                                          os
+import                                          joblib
+from pprint                             import  pprint
+from sklearn.model_selection            import  train_test_split
+from sklearn.model_selection            import  RandomizedSearchCV
+from sklearn.feature_selection          import  SelectKBest, chi2
+from sklearn.feature_extraction.text    import  CountVectorizer
+from sklearn.pipeline                   import  Pipeline
+from sklearn.compose                    import  ColumnTransformer
+from sklearn.ensemble                   import  RandomForestClassifier
+from sklearn.metrics                    import  accuracy_score
 
-
-'''
-USES PROCESSED AND LABELED DATA
-
-    0                1                2            3
-   'Date'           'Receiver'       'Amount'     'Category'
-    str(DateTime)    str              float        str
-
-'''
 
 
 
 DATA_PATH           = "/Users/rasmus/Desktop/2022_Labeled.csv"
-DATE_COLUMN         = 0
-TEXT_COLUMN         = 1
-AMOUNT_COLUMN       = 2
-CLASS_COLUMN        = 3
 RANDOM_SEARCH_N     = 500
 CROSS_VALIDATION    = 3
 SAVE_MODEL          = True
-MODEL_NAME          = "randomForest_pipeline.pkl_"
+MODEL_NAME          = "trained_model.pkl"
 
 
 
 
 print("============== USED DATA SET ===============")
-dataset = pd.read_csv(DATA_PATH)
-print('Shape of the data set: ' + str(dataset.shape) + " (Rows, Columns)")
-print(dataset.head(10))
-print("\n\n")
+df = DataFrame()
+df.load_data(DATA_PATH)
+print(df.get_info_str())
 
 
 
-print("============== ROWS WITH NaN ===============")
-df_nan_check = dataset[dataset.isna().any(axis=1)]
-print(df_nan_check)
-dataset = dataset.dropna()
-print('\nShape of the data after removing NaNs: ' + str(dataset.shape) + " (Rows, Columns)")
-print("\n\n")
+print("============== DATA EFTER REMOVING NaNs ===============")
+df.remove_nans()
+print(df.get_info_str())
 
 
 
 print("============ SPLITTING DATA TO TRAIN AND TEST =============")
-training_data = dataset.iloc[:, [TEXT_COLUMN, AMOUNT_COLUMN]]
-class_data = dataset.iloc[:, CLASS_COLUMN]
+dataset = df.get_df()
+training_data = dataset.iloc[:, [1, 2]]
+class_data = dataset.iloc[:, 3]
 X_train, X_test, y_train, y_test = train_test_split(training_data, class_data, 
                                                     test_size=0.2, 
                                                     random_state=21, 
@@ -119,7 +105,10 @@ print (model_pipeline)
 
 
 # ======================= HYPERPARAMETERS TO BE TESTED ==========================
-
+'''
+Fitting functions tests randomly some of theses hyperparameters to find 
+the best model. Changes can be made according to the "Best found parameters:"
+''' 
 n_estimators        = [int(x) for x in np.linspace(start = 1, stop = 120, num = 120)]
 max_depth           = [int(x) for x in np.linspace(1, 50, num = 50)]
 min_samples_split   = [int(x) for x in np.linspace(1, 20, num = 20)]
@@ -127,12 +116,14 @@ min_samples_leaf    = [int(x) for x in np.linspace(1, 10, num = 10)]
 bootstrap           = [True, False]
 chi2_k              = [int(x) for x in np.linspace(start = 50, stop = 200, num = 150)]
 
+
 random_grid =  {'randomForest__n_estimators': n_estimators,
                 'randomForest__max_depth': max_depth,
                 'randomForest__min_samples_split': min_samples_split,
                 'randomForest__min_samples_leaf': min_samples_leaf,
                 'randomForest__bootstrap': bootstrap,
                 'preprocessor__textTransformer__wordBankDimRed__k': chi2_k}
+
 
 print("\nFitting the base model...")
 base_model = model_pipeline
@@ -178,8 +169,12 @@ print('\nImprovement of {:0.2f}%.'.format( 100 * (random_accuracy - base_accurac
 
 
 if SAVE_MODEL:
-    with open(MODEL_NAME , 'wb') as file:
+    
+    ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+    FILE = os.path.join(ROOT_DIR, 'files', MODEL_NAME)
+
+    with open(FILE , 'wb') as file:
         joblib.dump(best_model, file)
-        print("\nModel saved as: " + MODEL_NAME)
+        print("\nModel saved as: " + MODEL_NAME + " to files-folder")
 
 

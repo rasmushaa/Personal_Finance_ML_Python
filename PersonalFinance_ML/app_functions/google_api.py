@@ -7,10 +7,10 @@ Created on 4 Sep 2022
 
 
 
-import  gspread
-import  pandas as pd
-from    google.oauth2.service_account import Credentials
-from utilis.error_handling import MyWarningError
+from    utilis                          import  MyWarningError
+import                                          gspread
+import  pandas                          as      pd
+from    google.oauth2.service_account   import  Credentials
 
 
 class GoogleAPI():

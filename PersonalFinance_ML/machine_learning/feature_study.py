@@ -7,50 +7,32 @@ Created on 7 Sep 2022
 
 
 
-import pandas as pd
-import seaborn as sns
-import matplotlib.pyplot as plt
-from sklearn.compose import ColumnTransformer
-from sklearn.feature_extraction.text import CountVectorizer
-from sklearn.feature_selection import mutual_info_classif
-from skfeature.function.similarity_based import fisher_score
-from sklearn.feature_selection import SelectKBest, chi2
-
-
-'''
-USES PROCESSED AND LABELED DATA
-
-    0                1                2            3
-   'Date'           'Receiver'       'Amount'     'Category'
-    str(DateTime)    str              float        str
-
-'''
-
-
-
-DATA_PATH           = "/Users/rasmus/Desktop/2022_Labeled.csv"
-DATE_COLUMN         = 'Date'
-TEXT_COLUMN         = 'Receiver'
-AMOUNT_COLUMN       = 'Amount'
-CLASS_COLUMN        = 'Category'
+from    app_functions                           import  DataFrame
+import                                                  pandas as pd
+import                                                  seaborn as sns
+import                                                  matplotlib.pyplot as plt
+from    sklearn.compose                         import  ColumnTransformer
+from    sklearn.feature_extraction.text         import  CountVectorizer
+from    sklearn.feature_selection               import  mutual_info_classif
+from    skfeature.function.similarity_based     import  fisher_score
+from    sklearn.feature_selection               import  SelectKBest, chi2
 
 
 
 
-print("============== USED DATA SET ===============")
-dataset = pd.read_csv(DATA_PATH)
-print('Shape of the data set: ' + str(dataset.shape) + " (Rows, Columns)")
-print(dataset.head(10))
-print("\n\n")
+DATA_PATH = "/Users/rasmus/Desktop/2022_Labeled.csv"
 
 
+print("============ USED DATA SET =============")
+df = DataFrame()
+df.load_data(DATA_PATH )
+print(df.get_info_str())
 
-print("============== ROWS WITH NaN ===============")
-df_nan_check = dataset[dataset.isna().any(axis=1)]
-print(df_nan_check)
-dataset = dataset.dropna()
-print('\nShape of the data after removing NaNs: ' + str(dataset.shape) + " (Rows, Columns)")
-print("\n\n")
+
+print("============== DATA EFTER REMOVING NaNs ===============")
+df.remove_nans()
+print(df.get_info_str())
+
 
 
 print("============ X, y and X_cat =============")
@@ -58,27 +40,28 @@ print("============ X, y and X_cat =============")
 '''
 Factorising running number variables
 '''
-dataset['Day of Month'] = dataset[DATE_COLUMN].astype('datetime64[ns]').dt.day
-dataset['Day of Week'] = dataset[DATE_COLUMN].astype('datetime64[ns]').dt.dayofweek
-dataset.loc[dataset['Day of Week'] >= 5, 'Weekend'] = 1
-dataset.loc[dataset['Day of Week'] <  5, 'Weekend'] = 0
-dataset.loc[dataset['Day of Month'] < 35, 'Month quarter'] = 3
-dataset.loc[dataset['Day of Month'] < 24, 'Month quarter'] = 2
-dataset.loc[dataset['Day of Month'] < 16, 'Month quarter'] = 1
-dataset.loc[dataset['Day of Month'] <  8, 'Month quarter'] = 0
-dataset.loc[dataset[AMOUNT_COLUMN] <  0, 'Amount sign'] = 1
-dataset.loc[dataset[AMOUNT_COLUMN] >= 0, 'Amount sign'] = 0
+dataset = df.get_df()
+dataset['Day of Month'] = dataset.iloc[:,0].astype('datetime64[ns]').dt.day
+dataset['Day of Week']  = dataset.iloc[:,0].astype('datetime64[ns]').dt.dayofweek
+dataset.loc[dataset['Day of Week'] >= 5, 'Weekend bool'] = 1
+dataset.loc[dataset['Day of Week'] <  5, 'Weekend bool'] = 0
+dataset.loc[dataset['Day of Month'] < 35, 'Quarter of Month'] = 3
+dataset.loc[dataset['Day of Month'] < 24, 'Quarter of Month'] = 2
+dataset.loc[dataset['Day of Month'] < 16, 'Quarter of Month'] = 1
+dataset.loc[dataset['Day of Month'] <  8, 'Quarter of Month'] = 0
+dataset.loc[dataset.iloc[:,2] <  0, 'Amount sign'] = 1
+dataset.loc[dataset.iloc[:,2] >= 0, 'Amount sign'] = 0
 
-X = dataset[['Day of Month', 'Day of Week', AMOUNT_COLUMN]]
+X = dataset[['Day of Month', 'Day of Week', 'Amount']]
 print('Shape of the X: ' + str(X.shape) + " (Rows, Columns)")
-print(X.head(20))
+print(X.head(10))
 
-dataset['Class']  = pd.factorize(dataset[CLASS_COLUMN])[0]
+dataset['Class']  = pd.factorize(dataset.iloc[:,3])[0]
 y = dataset['Class']
 print('\nShape of the y: ' + str(y.shape) + " (Rows, Columns)")
 print(y.head(10))
 
-X_cat = dataset[[TEXT_COLUMN, 'Month quarter', 'Weekend', 'Amount sign']]
+X_cat = dataset[['Receiver', 'Quarter of Month', 'Weekend bool', 'Amount sign']]
 print('\nShape of the X_cat: ' + str(X_cat.shape) + " (Rows, Columns)")
 print(X_cat.head(10))
 print("\n\n\n\n")
@@ -90,7 +73,7 @@ print("\n\n\n\n")
 Plot frequency of classes
 '''
 fig = plt.figure(figsize=(8,6))
-dataset[CLASS_COLUMN].value_counts().plot.bar(ylim=0, color="green", rot=45)
+dataset['Category'].value_counts().plot.bar(ylim=0, color="green", rot=45)
 plt.title('Class frequencies')
 plt.show()
 
@@ -100,10 +83,10 @@ Correlation
 '''
 corr = dataset[['Day of Month', 
                 'Day of Week', 
-                'Month quarter', 
-                'Weekend', 
+                'Quarter of Month', 
+                'Weekend bool', 
                 'Amount sign', 
-                AMOUNT_COLUMN, 
+                'Amount', 
                 'Class']].corr()
 sns.heatmap(corr, cmap="Greens", annot=True)
 plt.title('Correlation without words')

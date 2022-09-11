@@ -7,9 +7,9 @@ Created on 2 Sep 2022
 
 
 
-import os
-import json
-from utilis.error_handling import MyWarningError
+import  os
+import  json
+from    utilis import MyWarningError
 
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 FILE = os.path.join(ROOT_DIR, 'files', 'settings.json')
