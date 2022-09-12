@@ -9,7 +9,9 @@ Created on 19 Aug 2022
 
 from    application     import  Application
 from    utilis          import  MyWarningError
+from    files           import  gui_settings as settings
 import                          sys
+import                          os
 import                          traceback
 import  pandas          as      pd
 import  tkinter         as      tk
@@ -17,17 +19,19 @@ from    tkinter         import  ttk
 from    tkinter         import  messagebox
 from    tkinterdnd2     import  DND_FILES, TkinterDnD
 
+ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+
 
 
 class GUI(TkinterDnD.Tk, tk.Tk):
     def __init__(self):
         super().__init__()
         self.app = Application()
-        self.title(self.app.settings.application.title)
-        self.geometry(self.app.settings.application.window)       
+        self.title(settings.TITLE)
+        self.geometry(settings.WINDOW_GEOMETRY)                 
         self.front_page = FrontPage(parent=self, application=self.app)
         
-                
+        
     '''
     All exceptions will be shown here 
     and system may be exited
@@ -55,59 +59,118 @@ class FrontPage():
         self.gui = parent
         self.app = application
         
+        
+        '''
+        GOOGLE CLOUD AUTH
+        '''
+        labelframe = tk.LabelFrame(self.gui, text="Google cloud authentication")
+        labelframe.grid(row=0, column=0, sticky='ew', padx=(20, 10), pady=10)      
+        self.gui.grid_columnconfigure(0, weight=1)
         '''
         Entry labels
-        '''
-        l1 = tk.Label(self.gui, text = "Google sheet")
-        l2 = tk.Label(self.gui, text = "Google account key")     
-        l1.grid(row=0, column=0, sticky='w', padx=10)
-        l2.grid(row=1, column=0, sticky='w', padx=10)
-        self.gui.grid_columnconfigure(0, weight=0)
-        
+        '''     
+        l1 = tk.Label(labelframe, text = "Sheet")
+        l2 = tk.Label(labelframe, text = "Key")         
+        l1.grid(row=0, column=0, sticky='w', ipadx=2)
+        l2.grid(row=1, column=0, sticky='w', ipadx=2)   
+        labelframe.grid_columnconfigure(0, weight=0)        
         '''
         Entry boxes
         '''
-        self.entry_box_sheet = tk.Entry(self.gui)
+        self.entry_box_sheet = tk.Entry(labelframe,)
         self.entry_box_sheet.insert(0, self.app.settings.google_api.default_sheet)
-        self.entry_box_key = tk.Entry(self.gui)
-        self.entry_box_key.insert(0, self.app.settings.google_api.default_key)
-        self.entry_box_sheet.grid(row=0, column=1, sticky='ew', padx=10, pady=10)
-        self.entry_box_key.grid(row=1, column=1, sticky='ew', padx=10)
-        self.gui.grid_columnconfigure(1, weight=1)   
-        
+        self.entry_box_key = tk.Entry(labelframe)
+        self.entry_box_key.insert(0, self.app.settings.google_api.default_key)       
+        self.entry_box_sheet.grid(row=0, column=1, sticky='ew', padx=10, pady=7)
+        self.entry_box_key.grid(row=1, column=1, sticky='ew', padx=10, pady=9)      
+        labelframe.grid_columnconfigure(1, weight=1)
+
+
         '''
-        Check buttons
+        SAVE BUTTONS
+        '''
+        labelframe = tk.LabelFrame(self.gui, text="Save")
+        labelframe.grid(row=0, column=1, padx=(10, 20), pady=10)      
+        self.gui.grid_columnconfigure(1, weight=0)    
+        '''
+        Check button
         '''
         self.check_bool_1 = tk.IntVar()
-        self.check_button_1 = tk.Checkbutton(self.gui, 
+        self.check_button_1 = tk.Checkbutton(labelframe, 
                                              text = "Local backup", 
                                              variable = self.check_bool_1)
-        self.check_button_1.grid(row=0, column=2)
-  
+        self.check_button_1.grid(row=0, column=0)
         '''
         Save button
         '''
-        self.save_button = tk.Button(self.gui, 
+        self.save_button = tk.Button(labelframe, 
                                      text='Save',
                                      font=("arial bold", 18), 
                                      command=self.save_button_action,
                                      height = 2,
                                      width  = 6)
-        self.save_button.grid(row=1, column=2, padx=10)
-        self.gui.grid_columnconfigure(2, weight=0)
+        self.save_button.grid(row=1, column=0, padx=10, pady=5)
+        
+        
+        '''
+        AI SETTINGS
+        '''
+        labelframe = tk.LabelFrame(self.gui, text="AI")
+        labelframe.grid(row=1, column=0, columnspan=2, sticky='ew', padx=20, pady=0)     
+        '''
+        Check button
+        '''
+        self.check_bool_2 = tk.IntVar()
+        self.check_button_2 = tk.Checkbutton(labelframe, 
+                                             text = "Use AI",
+                                             pady = 0, 
+                                             variable = self.check_bool_2)
+        self.check_button_2.grid(row=0, column=0, pady=(0, 4))
+        self.check_button_2.select()
+        '''
+        Slider
+        '''
+        self.slider_label = tk.Label(labelframe, width=4)
+        self.slider_value = tk.IntVar()
+        def slider_label_update(a, b, c):
+            self.slider_label["text"] = "{:3d}%".format(self.slider_value.get())
+        self.slider_value.trace('w', slider_label_update)
+        l1 = tk.Label(labelframe, text = "Prediction limit")
+        self.slider = tk.Scale(labelframe, 
+                               from_=0, 
+                               to=100, 
+                               orient='horizontal', 
+                               variable=self.slider_value,
+                               showvalue=0)
+        self.slider.set(80)
+        l1.grid(row=0, column=2, sticky='w', padx=(5, 0), pady=(0, 4))
+        self.slider.grid(row=0, column=3, sticky='ew')
+        labelframe.grid_columnconfigure(3, weight=1)
+        self.slider_label.grid(row=0, column=4, sticky='e', padx=(0, 5), pady=(0, 4))
+        '''
+        Button
+        '''
+        self.auto_fill_button = tk.Button(labelframe, 
+                                     text='Auto fill',
+                                     font=("arial", 15), 
+                                     command=self.fill_button_action,
+                                     height = 1,
+                                     width  = 4)
+        self.auto_fill_button.grid(row=0, column=1, padx=5, ipady=2, ipadx=2, pady=(0, 5))
+        
 
         '''
-        CSV data
+        CSV DATA
         '''
         self.data_table = DataTable(parent=self.gui, application=self.app)
-        self.data_table.bind("<Right>", self.data_table.set_category)
-        self.data_table.bind("<Down>", self.data_table.scrolling_pad)
-        self.data_table.bind("<Double-1>", self.data_table.set_category)
+        self.data_table.bind("<Right>", self.set_category_action)
+        self.data_table.bind("<Down>", self.scrolling_pad_action)
+        self.data_table.bind("<Double-1>", self.set_category_action)
         self.data_table.bind("<<TreeviewSelect>>", self.predict_category_action)     
         self.data_table.drop_target_register(DND_FILES)
         self.data_table.dnd_bind("<<Drop>>", self.drop_files_action)   
-        self.data_table.grid(row=3, column=0, columnspan=3, sticky='nesw', padx=20, pady=20)
-        self.gui.grid_rowconfigure(3, weight=1)    
+        self.data_table.grid(row=2, column=0, columnspan=2, sticky='nesw', padx=20, pady=20)
+        self.gui.grid_rowconfigure(2, weight=1)    
    
         
     '''
@@ -117,6 +180,32 @@ class FrontPage():
         file_path = event.data
         self.app.pf_dataFrame.load_data(file_path)
         self.data_table.init_table(self.app.pf_dataFrame.get_df())
+    
+    def set_category_action(self, event):
+        self.data_table.set_category(event)
+        
+    def scrolling_pad_action(self, event):
+        self.data_table.scrolling_pad(event)
+    
+    def predict_category_action(self, event):       
+        if self.check_bool_2.get() and self.app.ai.seted_up():
+            row_values = self.data_table.get_row_values()
+            if row_values[-1] == "": # check if category is already chosen
+                row_id_str = self.data_table.get_row_id_str()
+                X = self.app.pf_dataFrame.get_x_features_row(int(row_id_str))
+                probas = self.app.ai.predict_proba(X)
+                if probas[0] > self.slider_value.get()/100:
+                    categories = self.app.ai.predict_category(X)
+                    self.data_table.update_row(row_id_str, categories[0])
+                    
+    def fill_button_action(self):
+        if not self.app.pf_dataFrame.get_df().empty:
+            X = self.app.pf_dataFrame.get_x_features()
+            categories = self.app.ai.predict_category(X)
+            probas = self.app.ai.predict_proba(X)      
+            for i, category in enumerate(categories):
+                if probas[i] > self.slider_value.get()/100:
+                    self.data_table.update_row(str(i), category)
            
     def save_button_action(self):
         key = self.entry_box_key.get()
@@ -127,11 +216,7 @@ class FrontPage():
             self.app.pf_dataFrame.save_data()
         self.app.google_api.auth(key)
         self.app.google_api.write_to_cloud(gogle_sheet, self.app.pf_dataFrame.get_df())
-        
-    def predict_category_action(self, event):
-        pass
-
-        
+                
         
         
 '''
@@ -156,21 +241,32 @@ class DataTable(ttk.Treeview):
         for col in columns:
             self.heading(col, text=col)            
             if col == "Date":
-                self.column(col, minwidth=0, width=100, stretch='NO')
+                self.column(col, minwidth=0, width=settings.DATE_WIDTH, stretch='NO')
             elif col == "Receiver":
-                self.column(col, minwidth=0, width=250, stretch='NO')
+                self.column(col, minwidth=0, width=settings.REC_WIDTH, stretch='NO')
             elif col == "Amount":
-                self.column(col, minwidth=0, width=100, stretch='NO')
+                self.column(col, minwidth=0, width=settings.AMOUNT_WIDTH, stretch='NO')
             elif col == "Category":
-                self.column(col, minwidth=0, width=200, stretch='YES')
+                self.column(col, minwidth=0, width=settings.CAT_WIDTH, stretch='YES')
 
         df_rows = dataframe.to_numpy().tolist()
         for i, row in enumerate(df_rows):
-            self.insert("", "end", iid=i, values=row)          
+            self.insert("", "end", iid=i, values=row) 
+            
+    
+    def get_row_id_str(self):
+        row_id_str = self.focus()
+        return row_id_str
+    
+    
+    def get_row_values(self):
+        row_id_str = self.get_row_id_str()
+        values = self.item(row_id_str)['values']
+        return values
           
             
     def set_category(self, event):
-        row_id_str = self.focus() 
+        row_id_str = self.get_row_id_str() 
         row = int(row_id_str)
         x, y, width, height = self.bbox(row, 3) #3 is the category
         
@@ -196,7 +292,7 @@ class DataTable(ttk.Treeview):
         
         
     def scrolling_pad(self, event):
-        row_id_str = self.focus() 
+        row_id_str = self.get_row_id_str() 
         row_pad = int(row_id_str) + len(self.app.settings.transaction_types.expenditure_list)
         if row_pad < len(self.get_children()):
             self.see(str(row_pad))

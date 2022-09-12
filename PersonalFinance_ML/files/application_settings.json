@@ -1,13 +1,8 @@
 {
-  "application": {
-    "window": "800x1000+1500+10",
-    "title": "Transaction Classifier"
-  },
   "google_api": {
     "default_sheet": "personal_finance_main",
     "default_key": "/Users/rasmus/Ohjelmointi/KEYS/personal-finance-drive-secret.json"
   },
-  "machine_learning": {},
   "transaction_types": {
     "expenditure_list": {
       "0": "FOOD",

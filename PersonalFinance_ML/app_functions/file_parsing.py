@@ -21,7 +21,13 @@ The _transform2pfdf must output data in the format of:
 
     0                1                2            3
    'Date'           'Receiver'       'Amount'     'Category'
-    str(DateTime)    str              float        NaN
+    str(DateTime)    str              float        str("")
+    
+If file contains Nan values, those must be converted to str("") values,
+since sklearn machine learning model is unable to handle missing values
+and will result an error. Although, files will be saved including 
+missing values as Nans, to help processing the data in some analyzing software.
+
     
     
 '''
@@ -53,6 +59,14 @@ class DataFrame():
                 "\n\nRows with NaNs:\n" + str(self._data_frame[self._data_frame.isna().any(axis=1)]) +
                 "\n\n")
         return msg
+    
+    
+    def get_x_features(self):
+        return self._data_frame.iloc[:, [1, 2]]
+    
+    
+    def get_x_features_row(self, row: int):
+        return self._data_frame.iloc[[row], [1, 2]]
     
     
     def remove_nans(self):
@@ -142,7 +156,7 @@ class DataFrame():
             Transform the file to PFDF
             '''
             if bank_file_type == 'PFDF':
-                pass
+                df = df.fillna("")
             
             elif bank_file_type == 'POP_Bank':       
                 df = df.rename({'Päivämäärä': 'Date', 
@@ -154,6 +168,7 @@ class DataFrame():
                 df = df.astype({'Amount': 'float'})
                 df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y')
                 df['Date'] = df['Date'].dt.date   
+                df = df.fillna("")
                               
             ''' if file_type == 'YouBankCSV':
                     Your transform code goes here...
