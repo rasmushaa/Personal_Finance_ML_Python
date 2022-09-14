@@ -7,17 +7,16 @@ Created on 19 Aug 2022
 
 
 
-from    application     import  Application
-from    utilis          import  MyWarningError
-from    files           import  gui_settings as settings
-import                          sys
-import                          os
-import                          traceback
-import  pandas          as      pd
-import  tkinter         as      tk
-from    tkinter         import  ttk
-from    tkinter         import  messagebox
-from    tkinterdnd2     import  DND_FILES, TkinterDnD
+from application import Application
+from utilis import MyWarningError
+from files import settings
+import sys
+import os
+import traceback
+import pandas as pd
+import tkinter as tk
+from tkinter import ttk, messagebox
+from tkinterdnd2 import DND_FILES, TkinterDnD
 
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 
@@ -58,12 +57,12 @@ class FrontPage():
     def __init__(self, parent, application):
         self.gui = parent
         self.app = application
-        
-        
+                
         '''
         GOOGLE CLOUD AUTH
         '''
-        labelframe = tk.LabelFrame(self.gui, text="Google cloud authentication")
+        labelframe = tk.LabelFrame(self.gui, 
+                                   text="Google cloud authentication")
         labelframe.grid(row=0, column=0, sticky='ew', padx=(20, 10), pady=10)      
         self.gui.grid_columnconfigure(0, weight=1)
         '''
@@ -78,13 +77,12 @@ class FrontPage():
         Entry boxes
         '''
         self.entry_box_sheet = tk.Entry(labelframe,)
-        self.entry_box_sheet.insert(0, self.app.settings.google_api.default_sheet)
+        self.entry_box_sheet.insert(0, settings.DEFAULT_SHEET)
         self.entry_box_key = tk.Entry(labelframe)
-        self.entry_box_key.insert(0, self.app.settings.google_api.default_key)       
+        self.entry_box_key.insert(0, settings.DEFAULT_KEY)       
         self.entry_box_sheet.grid(row=0, column=1, sticky='ew', padx=10, pady=7)
         self.entry_box_key.grid(row=1, column=1, sticky='ew', padx=10, pady=9)      
         labelframe.grid_columnconfigure(1, weight=1)
-
 
         '''
         SAVE BUTTONS
@@ -109,8 +107,7 @@ class FrontPage():
                                      command=self.save_button_action,
                                      height = 2,
                                      width  = 6)
-        self.save_button.grid(row=1, column=0, padx=10, pady=5)
-        
+        self.save_button.grid(row=1, column=0, padx=10, pady=5)      
         
         '''
         AI SETTINGS
@@ -132,8 +129,10 @@ class FrontPage():
         '''
         self.slider_label = tk.Label(labelframe, width=4)
         self.slider_value = tk.IntVar()
+        
         def slider_label_update(a, b, c):
             self.slider_label["text"] = "{:3d}%".format(self.slider_value.get())
+            
         self.slider_value.trace('w', slider_label_update)
         l1 = tk.Label(labelframe, text = "Prediction limit")
         self.slider = tk.Scale(labelframe, 
@@ -151,24 +150,23 @@ class FrontPage():
         Button
         '''
         self.auto_fill_button = tk.Button(labelframe, 
-                                     text='Auto fill',
+                                     text="Auto fill",
                                      font=("arial", 15), 
                                      command=self.fill_button_action,
                                      height = 1,
                                      width  = 4)
         self.auto_fill_button.grid(row=0, column=1, padx=5, ipady=2, ipadx=2, pady=(0, 5))
         
-
         '''
         CSV DATA
         '''
         self.data_table = DataTable(parent=self.gui, application=self.app)
-        self.data_table.bind("<Right>", self.set_category_action)
-        self.data_table.bind("<Down>", self.scrolling_pad_action)
-        self.data_table.bind("<Double-1>", self.set_category_action)
-        self.data_table.bind("<<TreeviewSelect>>", self.predict_category_action)     
+        self.data_table.bind('<Right>', self.set_category_action)
+        self.data_table.bind('<Down>', self.scrolling_pad_action)
+        self.data_table.bind('<Double-1>', self.set_category_action)
+        self.data_table.bind('<<TreeviewSelect>>', self.predict_category_action)     
         self.data_table.drop_target_register(DND_FILES)
-        self.data_table.dnd_bind("<<Drop>>", self.drop_files_action)   
+        self.data_table.dnd_bind('<<Drop>>', self.drop_files_action)   
         self.data_table.grid(row=2, column=0, columnspan=2, sticky='nesw', padx=20, pady=20)
         self.gui.grid_rowconfigure(2, weight=1)    
    
@@ -190,7 +188,7 @@ class FrontPage():
     def predict_category_action(self, event):       
         if self.check_bool_2.get() and self.app.ai.seted_up():
             row_values = self.data_table.get_row_values()
-            if row_values[-1] == "": # check if category is already chosen
+            if row_values[-1] == "":  # Check if category is already chosen
                 row_id_str = self.data_table.get_row_id_str()
                 X = self.app.pf_dataFrame.get_x_features_row(int(row_id_str))
                 probas = self.app.ai.predict_proba(X)
@@ -218,7 +216,6 @@ class FrontPage():
         self.app.google_api.write_to_cloud(gogle_sheet, self.app.pf_dataFrame.get_df())
                 
         
-        
 '''
 Shows CSV data in Treeview table
 '''
@@ -227,16 +224,15 @@ class DataTable(ttk.Treeview):
         super().__init__()
         self.gui = parent
         self.app = application
-        scroll_Y = tk.Scrollbar(self, orient="vertical", command=self.yview)
+        scroll_Y = tk.Scrollbar(self, orient='vertical', command=self.yview)
         self.configure(yscrollcommand=scroll_Y.set)
-        scroll_Y.pack(side="right", fill="y")
-
+        scroll_Y.pack(side='right', fill='y')
 
     def init_table(self, dataframe: type[pd.DataFrame]):     
         self.delete(*self.get_children())        
         columns = list(dataframe.columns)
-        self.__setitem__("column", columns)
-        self.__setitem__("show", "headings")
+        self.__setitem__('column', columns)
+        self.__setitem__('show', 'headings')
 
         for col in columns:
             self.heading(col, text=col)            
@@ -251,49 +247,41 @@ class DataTable(ttk.Treeview):
 
         df_rows = dataframe.to_numpy().tolist()
         for i, row in enumerate(df_rows):
-            self.insert("", "end", iid=i, values=row) 
-            
-    
+            self.insert("", 'end', iid=i, values=row) 
+                
     def get_row_id_str(self):
         row_id_str = self.focus()
         return row_id_str
-    
-    
+      
     def get_row_values(self):
         row_id_str = self.get_row_id_str()
         values = self.item(row_id_str)['values']
-        return values
-          
+        return values         
             
     def set_category(self, event):
         row_id_str = self.get_row_id_str() 
         row = int(row_id_str)
-        x, y, width, height = self.bbox(row, 3) #3 is the category
+        x, y, width, height = self.bbox(row, 3)  # 3 is the category
         
         self.list_popup = ListPopup(parent=self, row_id_str=row_id_str, application=self.app)
         self.list_popup.pack()    
         self.list_popup.place(y=y, x=x, width=width-20)     
         self.list_popup.update()
 
-        # if the popup box does not fit, place it above row
-        if y + self.list_popup.winfo_height() > self.winfo_height():
+        if y + self.list_popup.winfo_height() > self.winfo_height():  # if the popup box does not fit, place it above row
             y -= int(self.list_popup.winfo_height() * ((self.list_popup.size()-1) / self.list_popup.size()))
             self.list_popup.place(y=y, x=x, width=width-20)
-          
-                                  
+                                        
     def update_row(self, row_id_str: str, category: str):
-        # get row of treeview
         new_values = self.item(row_id_str)['values']
         row = int(row_id_str)
-        # last element of treeview is the new category
-        new_values[-1] = category
+        new_values[-1] = category  # Last element of treeview is the new category
         self.item(row_id_str, values=new_values)
         self.app.pf_dataFrame.update_category(row, category)   
-        
-        
+               
     def scrolling_pad(self, event):
         row_id_str = self.get_row_id_str() 
-        row_pad = int(row_id_str) + len(self.app.settings.transaction_types.expenditure_list)
+        row_pad = int(row_id_str) + len(self.app.categories.expenditures)
         if row_pad < len(self.get_children()):
             self.see(str(row_pad))
             
@@ -308,25 +296,24 @@ class ListPopup(tk.Listbox):
         self.row_id_str = row_id_str
         self.app = application
 
-        # Select income or expense
-        transaction_value = self.app.pf_dataFrame.get_df()['Amount'].iloc[int(self.row_id_str)]
+        transaction_value = self.app.pf_dataFrame.get_df()["Amount"].iloc[int(self.row_id_str)]
         if transaction_value > 0:
-            category_types = list(self.app.settings.transaction_types.income_list.values())
+            category_types = list(self.app.categories.incomes.values())
         else:
-            category_types = list(self.app.settings.transaction_types.expenditure_list.values())            
+            category_types = list(self.app.categories.expenditures.values())            
         tk_category_types = tk.StringVar(value=category_types)
    
         self.config(listvariable=tk_category_types, 
-                    background="skyblue4", 
-                    foreground="white", 
+                    background='skyblue4', 
+                    foreground='white', 
                     font=('Aerial 13'), 
                     height=len(category_types)) 
            
         self.selection_set( first = 0 )
-        self.bind("<Return>", self.onReturn)
-        self.bind("<Double-1>", self.onReturn)
-        self.bind("<FocusOut>", self.onFocusOut) 
-        self.bind("<Left>", self.onFocusOut)
+        self.bind('<Return>', self.onReturn)
+        self.bind('<Double-1>', self.onReturn)
+        self.bind('<FocusOut>', self.onFocusOut) 
+        self.bind('<Left>', self.onFocusOut)
         self.focus_set()
         
     def onFocusOut(self, event):
@@ -339,14 +326,5 @@ class ListPopup(tk.Listbox):
         self.data_table.update_row(self.row_id_str, category)
         self.destroy()
 
-
-
-            
-
-
-
-
-
-            
-            
+      
             

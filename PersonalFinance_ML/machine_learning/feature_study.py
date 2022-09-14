@@ -7,28 +7,25 @@ Created on 7 Sep 2022
 
 
 
-from    app_functions                           import  DataFrame
-import                                                  pandas as pd
-import                                                  seaborn as sns
-import                                                  matplotlib.pyplot as plt
-from    sklearn.compose                         import  ColumnTransformer
-from    sklearn.feature_extraction.text         import  CountVectorizer
-from    sklearn.feature_selection               import  mutual_info_classif
-from    skfeature.function.similarity_based     import  fisher_score
-from    sklearn.feature_selection               import  SelectKBest, chi2
+from functionality import DataFrame
+import pandas as pd
+import seaborn as sns
+import matplotlib.pyplot as plt
+from sklearn.compose import  ColumnTransformer
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.feature_selection import mutual_info_classif, SelectKBest, chi2
+from skfeature.function.similarity_based import fisher_score
+
+DATA_PATH = "/Users/rasmus/Desktop/2022_Labeled.csv"
 
 
 '''
 Data features can be studied in this module,
 and use to alter the model training function.
 Data is loaded from the path and transformed to used format
-in the app_functions.DataFrame.load_data(), which may be
+in the functionality.DataFrame.load_data(), which may be
 extended to accept new file formats for your own purposes.
 '''
-
-
-
-DATA_PATH = "/Users/rasmus/Desktop/2022_Labeled.csv"
 
 
 print("============ USED DATA SET =============")
@@ -104,14 +101,17 @@ plt.show()
 
 print("============ VECTORIZING TEXT =============")
 
-transformer = ColumnTransformer(transformers=[('vec', CountVectorizer(), 0)], remainder = 'passthrough')
+transformer = ColumnTransformer(transformers=[('vec', CountVectorizer(), 0)], 
+                                remainder = 'passthrough')
 X_cat = transformer.fit_transform(X_cat)
 vocabRaw = transformer.get_feature_names_out()
 vocab    = [s.replace("vec__", "") for s in vocabRaw]
 vocab    = [s.replace("remainder__",  "") for s in vocab]
 X_cat = pd.DataFrame(X_cat.toarray(), columns = vocab)
 
-print('Shape of the word bank: ' + str(X_cat.shape) + " (Rows, Columns)")
+print('Shape of the word bank: ' + 
+      str(X_cat.shape) + 
+      " (Rows, Columns)")
 print(X_cat.head(10))
 
 

@@ -7,39 +7,37 @@ Created on 6 Sep 2022
 
 
 
-from app_functions                      import  DataFrame
-import                                          pandas  as pd
-import                                          numpy   as np
-import                                          os
-import                                          joblib
-from pprint                             import  pprint
-from sklearn.model_selection            import  train_test_split
-from sklearn.model_selection            import  RandomizedSearchCV
-from sklearn.feature_selection          import  SelectKBest, chi2
-from sklearn.feature_extraction.text    import  CountVectorizer
-from sklearn.pipeline                   import  Pipeline
-from sklearn.compose                    import  ColumnTransformer
-from sklearn.ensemble                   import  RandomForestClassifier
-from sklearn.metrics                    import  accuracy_score
-
-
-'''
-This module fits an optimized Random forest classifier 
-to predict a category of banking transaction.
-Data is loaded from the path and transformed to used format
-in the app_functions.DataFrame.load_data(), which may be
-extended to accept new file formats for your own purposes.
-The model will be saved into the files-folder.
-'''
-
-
-
+from functionality import DataFrame
+import pandas as pd
+import numpy as np
+import os
+import joblib
+from pprint import pprint
+from sklearn.model_selection import train_test_split, RandomizedSearchCV
+from sklearn.feature_selection import SelectKBest, chi2
+from sklearn.feature_extraction.text import CountVectorizer
+from sklearn.pipeline import Pipeline
+from sklearn.compose import ColumnTransformer
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 DATA_PATH           = "/Users/rasmus/Desktop/2022_Labeled.csv"
 RANDOM_SEARCH_N     = 500
 CROSS_VALIDATION    = 3
 SAVE_MODEL          = True
 MODEL_NAME          = "trained_model.pkl"
+
+ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+FILE = os.path.join(ROOT_DIR, 'files', MODEL_NAME)
+
+'''
+This module fits an optimized Random forest classifier 
+to predict a category of banking transaction.
+Data is loaded from the path and transformed to used format
+in the functionality.DataFrame.load_data(), which may be
+extended to accept new file formats for your own purposes.
+The model will be saved into the files-folder.
+'''
 
 
 
@@ -179,10 +177,6 @@ print('\nImprovement of {:0.2f}%.'.format( 100 * (random_accuracy - base_accurac
 
 
 if SAVE_MODEL:
-    
-    ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
-    FILE = os.path.join(ROOT_DIR, 'files', MODEL_NAME)
-
     with open(FILE , 'wb') as file:
         joblib.dump(best_model, file)
         print("\nModel saved as: " + MODEL_NAME + " to files-folder")

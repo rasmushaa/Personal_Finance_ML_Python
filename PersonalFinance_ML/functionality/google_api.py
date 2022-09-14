@@ -7,12 +7,10 @@ Created on 4 Sep 2022
 
 
 
-from    utilis                          import  MyWarningError
-import                                          gspread
-import  pandas                          as      pd
-from    google.oauth2.service_account   import  Credentials
-
-
+from utilis import MyWarningError
+import gspread
+import pandas as pd
+from google.oauth2.service_account import Credentials
 
 '''
 This module pushes the labeled data to Google sheets.
@@ -23,13 +21,11 @@ your local machine.
 References: https://www.youtube.com/watch?v=bu5wXjz2KvU&t=595s
 '''
 
-
 class GoogleAPI():
     
     def __init__(self):
         self._client = None
-             
-                
+                            
     def auth(self, key: str):
         try:         
             scope = ['https://www.googleapis.com/auth/spreadsheets',
@@ -40,8 +36,7 @@ class GoogleAPI():
         except Exception as e:
             msg = "Authentication of Google service account failed"
             raise MyWarningError(msg, e, fatal=False)
-        
-        
+              
     def write_to_cloud(self, sheet: str, df : type[pd.DataFrame]):  
         if df.empty:
             raise MyWarningError("DataFrame could not be saved to cloud! \nNo frame was selected...")    

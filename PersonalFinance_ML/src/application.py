@@ -7,18 +7,18 @@ Created on 10 Sep 2022
 
 
 
-from app_functions import Settings
-from app_functions import DataFrame
-from app_functions import GoogleAPI
-from app_functions import AI
+from functionality import Categories
+from functionality import DataFrame
+from functionality import GoogleAPI
+from functionality import AI
 
 
 
 class Application():
     def __init__(self):
         super().__init__()
-        self.settings       = Settings()        
-        self.google_api     = GoogleAPI()
-        self.pf_dataFrame   = DataFrame()
-        self.ai             = AI()
+        self.categories = Categories()       
+        self.google_api = GoogleAPI()
+        self.pf_dataFrame = DataFrame()
+        self.ai = AI()
         

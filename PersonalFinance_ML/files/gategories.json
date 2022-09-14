@@ -1,8 +1,6 @@
+
+
 {
-  "google_api": {
-    "default_sheet": "personal_finance_main",
-    "default_key": "/Users/rasmus/Ohjelmointi/KEYS/personal-finance-drive-secret.json"
-  },
   "transaction_types": {
     "expenditure_list": {
       "0": "FOOD",

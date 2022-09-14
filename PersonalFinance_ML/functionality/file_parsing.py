@@ -7,12 +7,10 @@ Created on 9 Sep 2022
 
 
 
-from    utilis      import  MyWarningError
-import  pandas      as      pd
-import                      chardet
-import                      csv
-
-
+from utilis import MyWarningError
+import pandas as pd
+import chardet
+import csv
 
 '''
 You may increase capabilities of the software 
@@ -26,30 +24,25 @@ The _transform2pfdf must output data in the format of:
 If file contains Nan values, those must be converted to str("") values,
 since sklearn machine learning model is unable to handle missing values
 and will result an error. Although, files will be saved including 
-missing values as Nans, to help processing the data in some analyzing software.
-
-    
-    
+missing values as Nans, to help processing the data in some analyzing software.       
 '''
+
 
 class DataFrame():
     
     def __init__(self):
-        self._local_path        = ""
-        self._data_frame        = pd.DataFrame()
-        self._bank_file_type    = ""
-        self._encoding          = ""
-        self.separator          = ''
-        
+        self._local_path = ""
+        self._data_frame = pd.DataFrame()
+        self._bank_file_type = ""
+        self._encoding = ""
+        self.separator = ""
         
     def get_path(self):
         return self._local_path
-        
-        
+               
     def get_df(self):
         return self._data_frame
-    
-    
+      
     def get_info_str(self) -> str:
         msg = ("Local path: " + self._local_path +
                 "\nData loaded from " + self._bank_file_type + "-file" +
@@ -59,33 +52,27 @@ class DataFrame():
                 "\n\nRows with NaNs:\n" + str(self._data_frame[self._data_frame.isna().any(axis=1)]) +
                 "\n\n")
         return msg
-    
-    
+      
     def get_x_features(self):
         return self._data_frame.iloc[:, [1, 2]]
     
-    
     def get_x_features_row(self, row: int):
         return self._data_frame.iloc[[row], [1, 2]]
-    
-    
+      
     def remove_nans(self):
         self._data_frame = self._data_frame.dropna()
-        
-        
+              
     def update_category(self, row: int, category: str):
-        self._data_frame.at[row, 'Category'] = category
-    
+        self._data_frame.at[row, 'Category'] = category 
     
     def save_data(self):
-        if not self._data_frame.empty:
+        if self._data_frame.empty:
+            raise MyWarningError("DataFrame could not be saved. \nNo frame selected...")
+        else:
             save_path = self._local_path.rsplit('.')[0]
             save_path += "_Labeled.csv"
             self._data_frame.to_csv(save_path, index=False, sep=',', encoding=self._encoding) 
-        else:
-            raise MyWarningError("DataFrame could not be saved. \nNo frame selected...")
-        
-           
+                
     def load_data(self, path: str):      
         try:    
             '''
@@ -119,8 +106,7 @@ class DataFrame():
             self._bank_file_type = bank_file_type
             self._encoding = encoding
             self._separator = separator
-            
-                         
+                                     
         except Exception as e:
             msg = "Data could not be loaded!"
             raise MyWarningError(msg, e, fatal=False)
