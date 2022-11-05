@@ -39,6 +39,9 @@ class DataFrame():
         
     def get_path(self):
         return self._local_path
+    
+    def get_bank_str(self):
+        return self._bank_file_type
                
     def get_df(self):
         return self._data_frame
@@ -50,6 +53,7 @@ class DataFrame():
                 "\n\nShape of the DataFrame: " + str(self._data_frame.shape) + 
                 "\n" + str(self._data_frame.head(10)) +
                 "\n\nRows with NaNs:\n" + str(self._data_frame[self._data_frame.isna().any(axis=1)]) +
+                "\n\nRows with Empty strings:\n" + str(self._data_frame[self._data_frame.applymap(lambda x: x == '').any(axis=1)]) +
                 "\n\n")
         return msg
       
@@ -61,6 +65,9 @@ class DataFrame():
       
     def remove_nans(self):
         self._data_frame = self._data_frame.dropna()
+        
+    def remove_empties(self):
+        self._data_frame = self._data_frame[self._data_frame['Receiver'] != '']
               
     def update_category(self, row: int, category: str):
         self._data_frame.at[row, 'Category'] = category 
@@ -123,6 +130,16 @@ class DataFrame():
             column_list[3] == 'Category'):
             return 'PFDF'
         
+        if (len(column_list) == 7 and
+            column_list[0] == 'Date' and
+            column_list[1] == 'Receiver' and
+            column_list[2] == 'Amount' and
+            column_list[3] == 'Category' and 
+            column_list[4] == 'Category ID' and
+            column_list[5] == 'Commit date' and
+            column_list[6] == 'Commit file ID'):
+            return 'PFDF_GS'
+        
         if (len(column_list) == 5 and
             column_list[0] == 'Päivämäärä' and
             column_list[1] == 'Saaja/Maksaja' and
@@ -138,10 +155,11 @@ class DataFrame():
                   
     def _transform2pfdf(self, df: type[pd.DataFrame], bank_file_type : str) -> type[pd.DataFrame]:      
         try:                      
-            '''
-            Transform the file to PFDF
-            '''
             if bank_file_type == 'PFDF':
+                df = df.fillna("")
+                
+            elif bank_file_type == 'PFDF_GS':
+                df = df.drop(['Category ID', 'Commit date', 'Commit file ID'], axis=1)
                 df = df.fillna("")
             
             elif bank_file_type == 'POP_Bank':       
@@ -153,7 +171,7 @@ class DataFrame():
                 df['Amount'] = df['Amount'].str.replace(',', '.')
                 df = df.astype({'Amount': 'float'})
                 df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y')
-                df['Date'] = df['Date'].dt.date   
+                df['Date'] = df['Date'].dt.date.astype(str)
                 df = df.fillna("")
                               
             ''' if file_type == 'YouBankCSV':

@@ -30,4 +30,3 @@ class Categories():
     def load_parameters(self, path):
         with open(path) as file:
             return json.load(file)
-                     

@@ -95,7 +95,7 @@ class FrontPage():
         '''
         self.check_bool_1 = tk.IntVar()
         self.check_button_1 = tk.Checkbutton(labelframe, 
-                                             text = "Local backup", 
+                                             text = "Local save", 
                                              variable = self.check_bool_1)
         self.check_button_1.grid(row=0, column=0)
         '''
@@ -206,14 +206,14 @@ class FrontPage():
                     self.data_table.update_row(str(i), category)
            
     def save_button_action(self):
-        key = self.entry_box_key.get()
-        gogle_sheet = self.entry_box_sheet.get()
-        local_save_bool = self.check_bool_1.get()
-        
+        local_save_bool = self.check_bool_1.get()      
         if local_save_bool:
             self.app.pf_dataFrame.save_data()
-        self.app.google_api.auth(key)
-        self.app.google_api.write_to_cloud(gogle_sheet, self.app.pf_dataFrame.get_df())
+        else:
+            key = self.entry_box_key.get()
+            gogle_sheet = self.entry_box_sheet.get()
+            self.app.google_api.auth(key)
+            self.app.google_api.write_to_cloud(gogle_sheet)
                 
         
 '''

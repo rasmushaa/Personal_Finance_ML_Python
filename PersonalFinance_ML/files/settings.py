@@ -9,8 +9,7 @@ Created on 12 Sep 2022
 
 TITLE = "Transaction classifier"
 WINDOW_GEOMETRY = "750x1000+1500+10"
-
-DEFAULT_SHEET = "personal_finance_main"
+DEFAULT_SHEET = "pf_transactions"
 DEFAULT_KEY = "/Users/rasmus/Ohjelmointi/KEYS/personal-finance-drive-secret.json"
 
 DATE_WIDTH = 100

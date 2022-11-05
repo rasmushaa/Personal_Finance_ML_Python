@@ -21,7 +21,7 @@ from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
 
-DATA_PATH           = "/Users/rasmus/Desktop/2022_Labeled.csv"
+DATA_PATH           = "/Users/rasmus/Desktop/gs_Labeled.csv"
 RANDOM_SEARCH_N     = 500
 CROSS_VALIDATION    = 3
 SAVE_MODEL          = True
@@ -50,7 +50,7 @@ print(df.get_info_str())
 
 
 print("============== DATA EFTER REMOVING NaNs ===============")
-df.remove_nans()
+df.remove_empties()
 print(df.get_info_str())
 
 

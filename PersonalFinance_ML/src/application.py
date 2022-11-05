@@ -18,7 +18,7 @@ class Application():
     def __init__(self):
         super().__init__()
         self.categories = Categories()       
-        self.google_api = GoogleAPI()
+        self.google_api = GoogleAPI(self)
         self.pf_dataFrame = DataFrame()
         self.ai = AI()
         

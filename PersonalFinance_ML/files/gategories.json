@@ -3,21 +3,22 @@
 {
   "transaction_types": {
     "expenditure_list": {
-      "0": "FOOD",
-      "1": "LIVING",
-      "2": "HEALTH",
-      "3": "COMMUTING",
-      "4": "HOUSEHOLD ITEMS",
+      "1": "FOOD",
+      "0": "LIVING",
+      "4": "TECHNOLOGY",
       "5": "HOBBIES",
+      "7": "ENTERTAINMENT",
+      "3": "COMMUTING",
       "6": "CLOTHING",
-      "7": "TECHNOLOGY",
-      "8": "UNCATEGORIZED",
-      "9": "INVESTING"
+      "2": "HEALTH",
+      "8": "HOUSEHOLD ITEMS",
+      "10": "INVESTING",
+      "9": "UNCATEGORIZED",
+      "404": ""
     },
     "income_list": {
-      "10": "SALARY",
-      "11": "OTHER INCOME",
-      "12": "CAPITAL INCOME"
+      "11": "SALARY",
+      "13": "OTHER INCOME"
     }
   }
 }
