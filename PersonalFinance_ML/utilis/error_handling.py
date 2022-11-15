@@ -23,9 +23,9 @@ the main loop.
 class MyWarningError(Exception):
 
     def __init__(self, note: str, error: type[Exception]=None, fatal: bool=False):       
-        self.note       = note
+        self.note = note
         self.root_error = error
-        self.fatal      = fatal
+        self.fatal = fatal
 
 
     def __str__(self):               

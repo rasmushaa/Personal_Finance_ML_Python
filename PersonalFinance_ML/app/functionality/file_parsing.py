@@ -9,13 +9,14 @@ Created on 9 Sep 2022
 
 from utilis import MyWarningError
 import pandas as pd
+from datetime import date
 import chardet
 import csv
 
 '''
 You may increase capabilities of the software 
 by adding your own parser code here.
-The _transform2pfdf must output data in the format of:
+The _transform2aidf must output data in the format of:
 
     0                1                2            3
    'Date'           'Receiver'       'Amount'     'Category'
@@ -30,7 +31,8 @@ missing values as Nans, to help processing the data in some analyzing software.
 
 class DataFrame():
     
-    def __init__(self):
+    def __init__(self, app):
+        self._app = app
         self._local_path = ""
         self._data_frame = pd.DataFrame()
         self._bank_file_type = ""
@@ -43,9 +45,6 @@ class DataFrame():
     def get_bank_str(self):
         return self._bank_file_type
                
-    def get_df(self):
-        return self._data_frame
-      
     def get_info_str(self) -> str:
         msg = ("Local path: " + self._local_path +
                 "\nData loaded from " + self._bank_file_type + "-file" +
@@ -62,6 +61,56 @@ class DataFrame():
     
     def get_x_features_row(self, row: int):
         return self._data_frame.iloc[[row], [1, 2]]
+    
+    def get_df(self):
+        return self._data_frame
+    
+    def get_df_gs(self):
+        '''
+        Adds one empty row for each Category at
+        beginning of each month, which ensures that
+        averages per month are calculated correctly,
+        without actually changing summing values
+        '''
+        temp_df = self._data_frame.copy()
+        if temp_df.empty:
+            raise ValueError("No DataFrame was selected...")   
+        founded_times = []
+        category_types = list(self._app.categories.expenditures.values()) + list(self._app.categories.incomes.values())  
+        offset = 0 
+        for index, row in temp_df.iterrows():
+            year_month = row['Date'].rsplit('-', 1)[0]
+            if year_month not in founded_times:
+                founded_times.append(year_month)
+                for i, category in enumerate(category_types):
+                    line = pd.DataFrame({"Date": row['Date'], "Receiver": '', 'Amount': 0.0, 'Category': category}, index=[index+i])
+                    temp_df = pd.concat([temp_df.iloc[:index+offset+i], line, temp_df.iloc[index+offset+i:]]).reset_index(drop=True)
+                offset += len(category_types)
+            
+        '''
+        Adds ID category for plotting
+        '''
+        temp_df['Category ID'] = ""  
+        for cat_id, cat in self._app.categories.expenditures.items():
+            temp_df.loc[temp_df['Category'] == cat, 'Category ID'] = cat_id
+        for cat_id, cat in self._app.categories.incomes.items():
+            temp_df.loc[temp_df['Category'] == cat, 'Category ID'] = cat_id
+        
+        '''
+        Time stamp of commit,
+        file id
+        '''      
+        temp_df['Commit date'] = str(date.today())
+        temp_df['Commit file'] = self._app.data_frame.get_bank_str()
+        
+        '''
+        Flip df to chronological order
+        for google sheets
+        '''
+        temp_df = temp_df.iloc[::-1]
+        
+        return temp_df
+        
       
     def remove_nans(self):
         self._data_frame = self._data_frame.dropna()
@@ -78,10 +127,13 @@ class DataFrame():
         else:
             save_path = self._local_path.rsplit('.')[0]
             save_path += "_Labeled.csv"
-            self._data_frame.to_csv(save_path, index=False, sep=',', encoding=self._encoding) 
+            self._data_frame.to_csv(save_path, index=False, sep=',', encoding=self._encoding)        
                 
     def load_data(self, path: str):      
-        try:    
+        try:  
+            if not path.endswith('.csv'):
+                raise TypeError("File type is not supported!\nOnly CSV files are allowed...")  
+                         
             '''
             Auto detect encoding
             '''     
@@ -98,11 +150,11 @@ class DataFrame():
             '''
             Load the file,
             determine the bank,
-            transform to PFDF
+            transform to AIDF
             '''
             df = pd.read_csv(path, encoding=encoding, sep=separator)           
             bank_file_type = self._detect_bank(df)
-            df = self._transform2pfdf(df, bank_file_type)
+            df = self._transform2aidf(df, bank_file_type)
             
             '''
             If succeeded, 
@@ -128,9 +180,9 @@ class DataFrame():
             column_list[1] == 'Receiver' and
             column_list[2] == 'Amount' and
             column_list[3] == 'Category'):
-            return 'PFDF'
+            return 'AIDF'
         
-        if (len(column_list) == 7 and
+        elif (len(column_list) == 7 and
             column_list[0] == 'Date' and
             column_list[1] == 'Receiver' and
             column_list[2] == 'Amount' and
@@ -138,50 +190,48 @@ class DataFrame():
             column_list[4] == 'Category ID' and
             column_list[5] == 'Commit date' and
             column_list[6] == 'Commit file ID'):
-            return 'PFDF_GS'
+            return 'AIDF_GS'
         
-        if (len(column_list) == 5 and
+        elif (len(column_list) == 5 and
             column_list[0] == 'Päivämäärä' and
             column_list[1] == 'Saaja/Maksaja' and
             column_list[2] == 'Selite' and
             column_list[3] == 'Viite/Viesti' and
             column_list[4] == 'Määrä'):
-            return 'POP_Bank'
+            return 'POP_BANK'
         
-        ''' if (Your file detection code):
-                return 'YouBankCSV'
-        '''
+        #elif (Your file detection code):
+            #return 'YouBankCSV'       
+        else:
+            raise TypeError("The Bank is not supported...")
         
                   
-    def _transform2pfdf(self, df: type[pd.DataFrame], bank_file_type : str) -> type[pd.DataFrame]:      
-        try:                      
-            if bank_file_type == 'PFDF':
-                df = df.fillna("")
-                
-            elif bank_file_type == 'PFDF_GS':
-                df = df.drop(['Category ID', 'Commit date', 'Commit file ID'], axis=1)
-                df = df.fillna("")
+    def _transform2aidf(self, df: type[pd.DataFrame], bank_file_type : str) -> type[pd.DataFrame]:                      
+        if bank_file_type == 'AIDF':
+            df = df.fillna("")
             
-            elif bank_file_type == 'POP_Bank':       
-                df = df.rename({'Päivämäärä': 'Date', 
-                                'Saaja/Maksaja': 'Receiver', 
-                                'Määrä': 'Amount'}, axis=1)      
-                df = df.drop(['Selite', 'Viite/Viesti'], axis=1)
-                df["Category"] = ""
-                df['Amount'] = df['Amount'].str.replace(',', '.')
-                df = df.astype({'Amount': 'float'})
-                df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y')
-                df['Date'] = df['Date'].dt.date.astype(str)
-                df = df.fillna("")
-                              
-            ''' if file_type == 'YouBankCSV':
-                    Your transform code goes here...
-            '''      
-            return df
+        elif bank_file_type == 'AIDF_GS':
+            df = df.drop(['Category ID', 'Commit date', 'Commit file ID'], axis=1)
+            df = df.fillna("")
+        
+        elif bank_file_type == 'POP_BANK':       
+            df = df.rename({'Päivämäärä': 'Date', 
+                            'Saaja/Maksaja': 'Receiver', 
+                            'Määrä': 'Amount'}, axis=1)      
+            df = df.drop(['Selite', 'Viite/Viesti'], axis=1)
+            df["Category"] = ""
+            df['Amount'] = df['Amount'].str.replace(',', '.')
+            df = df.astype({'Amount': 'float'})
+            df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y')
+            df['Date'] = df['Date'].dt.date.astype(str)
+            df = df.fillna("")
+                          
+        
+        #if file_type == 'YouBankCSV':
+            #Your transform code goes here... 
+             
+        return df
                          
-        except Exception as e:
-            msg = "Data could not be loaded!"
-            raise MyWarningError(msg, e, fatal=False)
         
         
             

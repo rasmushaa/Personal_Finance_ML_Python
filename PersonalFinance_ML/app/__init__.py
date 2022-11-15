@@ -1,10 +1,10 @@
-'''
-Created on 5 Nov 2022
-
-@author: rasmus
-'''
 
 
 
 
-from .gui import GUI
+
+
+
+
+
+from .application import Application

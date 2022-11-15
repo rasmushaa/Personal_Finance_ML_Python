@@ -11,15 +11,15 @@ import os
 import json
 from utilis import MyWarningError
 
-
+FILE = "gategories.json"
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
-FILE = os.path.join(ROOT_DIR, "files", "gategories.json")
+FILE_PATH = os.path.join(ROOT_DIR, "files", FILE)
 
 
 class Categories():  
     def __init__(self):  
         try:            
-            json = self.load_parameters(FILE)      
+            json = self.load_parameters(FILE_PATH)      
             self.expenditures = json["transaction_types"]["expenditure_list"]
             self.incomes = json["transaction_types"]["income_list"]
             

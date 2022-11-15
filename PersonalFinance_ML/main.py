@@ -7,7 +7,7 @@ Created on 19 Aug 2022
 
 
 
-from app import GUI
+from gui import GUI
 
 
 if __name__ == "__main__":

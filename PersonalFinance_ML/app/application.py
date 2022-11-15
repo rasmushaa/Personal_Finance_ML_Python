@@ -7,10 +7,10 @@ Created on 10 Sep 2022
 
 
 
-from functionality import Categories
-from functionality import DataFrame
-from functionality import GoogleAPI
-from functionality import AI
+from .functionality import Categories
+from .functionality import DataFrame
+from .functionality import GoogleAPI
+from .functionality import AI
 
 
 
@@ -19,6 +19,6 @@ class Application():
         super().__init__()
         self.categories = Categories()       
         self.google_api = GoogleAPI(self)
-        self.pf_dataFrame = DataFrame()
-        self.ai = AI()
+        self.data_frame = DataFrame(self)
+        self.ai = AI(self)
         
