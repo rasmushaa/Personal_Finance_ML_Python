@@ -12,15 +12,16 @@ import pandas as pd
 import numpy as np
 import os
 import joblib
+import queue
 from sklearn.model_selection import train_test_split, RandomizedSearchCV
 from sklearn.feature_selection import SelectKBest, chi2
 from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.pipeline import Pipeline
 from sklearn.compose import ColumnTransformer
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score, confusion_matrix, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score
 
-MODEL_NAME  = "trained_model.pkl"
+MODEL_NAME  = "_trained_model.pkl"
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 FILE = os.path.join(ROOT_DIR, 'files', MODEL_NAME)
 
@@ -74,13 +75,11 @@ class AI():
             self._active = False
             raise MyWarningError(msg, e, fatal=False)
     
-    def train_model(self, dataset: pd.DataFrame) -> float:
-        self._active = False
-        try:         
-            if dataset.empty:
+    def train_model(self, queue_signal: queue.Queue=None):
+        try:   
+            if self._app.data_frame.get_df().empty:
                 raise ValueError("No data frame was selected!")   
-            dataset = dataset.dropna()
-            dataset = dataset[dataset['Receiver'] != '']
+            dataset = self._app.data_frame.get_df_training()
                         
             # ===================== DATA SPLIT ===========================
             training_data = dataset.iloc[:, [1, 2]]
@@ -90,7 +89,7 @@ class AI():
                                                                 test_size=0.2, 
                                                                 random_state=21, 
                                                                 stratify=class_data)
-                     
+
             # ===================== PIPELINE ===========================
             text_transformer = Pipeline(
                 steps=[
@@ -137,10 +136,18 @@ class AI():
             tuned_model.fit(X_train, y_train)
             best_model = tuned_model.best_estimator_               
             y_pred = best_model.predict(X_test)
-            accuracy = accuracy_score(y_test, y_pred)   
-            return accuracy
+            accuracy = accuracy_score(y_test, y_pred) 
+            if queue_signal is not None: 
+                queue_signal.put({'progress': 1000})
+                queue_signal.put({'accuracy': accuracy}) 
+            
+            with open(FILE , 'wb') as file:
+                joblib.dump(best_model, file)
 
         except Exception as e:
-            msg = "Training the AI model failed!"
-            raise MyWarningError(msg, e, fatal=False)
+            if queue_signal is not None:
+                queue_signal.put({'error': e})
+            else:
+                msg = "Training the AI model failed!"
+                raise MyWarningError(msg, e, fatal=False)
         

@@ -25,7 +25,7 @@ The _transform2aidf must output data in the format of:
 If file contains Nan values, those must be converted to str("") values,
 since sklearn machine learning model is unable to handle missing values
 and will result an error. Although, files will be saved including 
-missing values as Nans, to help processing the data in some analyzing software.       
+missing values as Nans, to help processing the data in the Data Studio.       
 '''
 
 
@@ -51,8 +51,8 @@ class DataFrame():
                 "\nUsed separator: (" + self._separator + ") endoding: " + self._encoding +
                 "\n\nShape of the DataFrame: " + str(self._data_frame.shape) + 
                 "\n" + str(self._data_frame.head(10)) +
-                "\n\nRows with NaNs:\n" + str(self._data_frame[self._data_frame.isna().any(axis=1)]) +
-                "\n\nRows with Empty strings:\n" + str(self._data_frame[self._data_frame.applymap(lambda x: x == '').any(axis=1)]) +
+                "\n\nRows with NaNs:\n" + str(len(self._data_frame[self._data_frame.isna().any(axis=1)])) +
+                "\n\nRows with Empty strings:\n" + str(len(self._data_frame[self._data_frame.applymap(lambda x: x == '').any(axis=1)])) +
                 "\n\n")
         return msg
       
@@ -64,6 +64,14 @@ class DataFrame():
     
     def get_df(self):
         return self._data_frame
+
+    def get_df_training(self):
+        original = self._data_frame.copy()
+        self.remove_empties()
+        self.remove_nans()
+        processed = self._data_frame
+        self._data_frame = original
+        return processed
     
     def get_df_gs(self):
         '''
@@ -107,8 +115,7 @@ class DataFrame():
         Flip df to chronological order
         for google sheets
         '''
-        temp_df = temp_df.iloc[::-1]
-        
+        temp_df = temp_df.iloc[::-1]  
         return temp_df
         
       
@@ -117,6 +124,7 @@ class DataFrame():
         
     def remove_empties(self):
         self._data_frame = self._data_frame[self._data_frame['Receiver'] != '']
+        self._data_frame = self._data_frame[self._data_frame['Category'] != '']
               
     def update_category(self, row: int, category: str):
         self._data_frame.at[row, 'Category'] = category 
@@ -124,57 +132,64 @@ class DataFrame():
     def save_data(self):
         if self._data_frame.empty:
             raise MyWarningError("DataFrame could not be saved. \nNo frame selected...")
+        if self._local_path is None:
+            raise MyWarningError("DataFrame pulled from Google sheets\ncan not be saved localy!\nPath is unkown...")
         else:
             save_path = self._local_path.rsplit('.')[0]
             save_path += "_Labeled.csv"
-            self._data_frame.to_csv(save_path, index=False, sep=',', encoding=self._encoding)        
+            self._data_frame.to_csv(save_path, index=False, sep=',', encoding=self._encoding)    
+
+    def set_data(self, df: pd.DataFrame):
+        bank_file_type = self._detect_bank(df)
+        df = self._transform2aidf(df, bank_file_type)
+        self._local_path = None
+        self._data_frame = df
+        self._bank_file_type = bank_file_type
+        self._encoding = None
+        self._separator = ','
                 
     def load_data(self, path: str):      
         try:  
             if not path.endswith('.csv'):
-                raise TypeError("File type is not supported!\nOnly CSV files are allowed...")  
-                         
-            '''
-            Auto detect encoding
-            '''     
-            with open(path, 'rb') as csvFile:
-                encoding_dict = chardet.detect(csvFile.read())
-                encoding = encoding_dict['encoding']
-            '''
-            Auto detect separator
-            '''  
-            with open(path, 'r', encoding=encoding) as csvFile:
-                dialect = csv.Sniffer().sniff(csvFile.read(), delimiters=[',', ';', '', '\t', '|'])
-                separator = dialect.delimiter
-          
+                raise TypeError("File type is not supported!\nOnly CSV files are allowed...")                     
             '''
             Load the file,
             determine the bank,
             transform to AIDF
             '''
-            df = pd.read_csv(path, encoding=encoding, sep=separator)           
-            bank_file_type = self._detect_bank(df)
-            df = self._transform2aidf(df, bank_file_type)
-            
-            '''
-            If succeeded, 
-            add data to class
-            '''
             self._local_path = path
-            self._data_frame = df
+            df = self._auto_open_file(path)          
+            bank_file_type = self._detect_bank(df)
             self._bank_file_type = bank_file_type
-            self._encoding = encoding
-            self._separator = separator
-                                     
+            df = self._transform2aidf(df, bank_file_type)
+            self._data_frame = df                                  
         except Exception as e:
             msg = "Data could not be loaded!"
             raise MyWarningError(msg, e, fatal=False)
+
+    def _auto_open_file(self, path: str) ->pd.DataFrame:
+        '''
+        Detect encoding
+        '''     
+        with open(path, 'rb') as csvFile:
+            encoding_dict = chardet.detect(csvFile.read())
+            encoding = encoding_dict['encoding']
+        '''
+        Detect separator
+        '''  
+        with open(path, 'r', encoding=encoding) as csvFile:
+            dialect = csv.Sniffer().sniff(csvFile.read(), delimiters=[',', ';', '', '\t', '|'])
+            separator = dialect.delimiter
         
+        df = pd.read_csv(path, encoding=encoding, sep=separator)
+        self._encoding = encoding
+        self._separator = separator
+        return df
         
     def _detect_bank(self, df: type[pd.DataFrame]) -> str:
         
         column_list = list(df.columns)
-        
+
         if (len(column_list) == 4 and
             column_list[0] == 'Date' and
             column_list[1] == 'Receiver' and
@@ -201,7 +216,7 @@ class DataFrame():
             return 'POP_BANK'
         
         #elif (Your file detection code):
-            #return 'YouBankCSV'       
+            #return 'YourBankCSV'       
         else:
             raise TypeError("The Bank is not supported...")
         
@@ -212,6 +227,7 @@ class DataFrame():
             
         elif bank_file_type == 'AIDF_GS':
             df = df.drop(['Category ID', 'Commit date', 'Commit file ID'], axis=1)
+            df = df.astype({'Date':'string','Receiver':'string','Amount':'float','Category':'string'})
             df = df.fillna("")
         
         elif bank_file_type == 'POP_BANK':       
@@ -224,12 +240,10 @@ class DataFrame():
             df = df.astype({'Amount': 'float'})
             df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y')
             df['Date'] = df['Date'].dt.date.astype(str)
-            df = df.fillna("")
-                          
+            df = df.fillna("")           
         
-        #if file_type == 'YouBankCSV':
-            #Your transform code goes here... 
-             
+        #if file_type == 'YourBankCSV':
+            #Your transform code goes here...         
         return df
                          
         

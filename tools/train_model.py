@@ -6,8 +6,12 @@ Created on 6 Sep 2022
 
 
 
+import sys
+ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
+FOLDER_PATH = os.path.join(ROOT_DIR, "src/")
+sys.path.append(FOLDER_PATH)
 
-from functionality import DataFrame
+from app import Application
 import pandas as pd
 import numpy as np
 import os
@@ -25,25 +29,23 @@ DATA_PATH           = "/Users/rasmus/Desktop/gs_Labeled.csv"
 RANDOM_SEARCH_N     = 500
 CROSS_VALIDATION    = 3
 SAVE_MODEL          = True
-MODEL_NAME          = "trained_model.pkl"
-
-ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
-FILE = os.path.join(ROOT_DIR, 'files', MODEL_NAME)
+MODEL_NAME          = "trained_test_model.pkl"
 
 '''
 This module fits an optimized Random forest classifier 
 to predict a category of banking transaction.
 Data is loaded from the path and transformed to used format
-in the functionality.DataFrame.load_data(), which may be
-extended to accept new file formats for your own purposes.
-The model will be saved into the files-folder.
+in the app.DataFrame.load_data(), which may be
+extended to accept new file types for your own purposes.
+The model will be saved into the current folder.
 '''
 
 
 
 
 print("============== USED DATA SET ===============")
-df = DataFrame()
+app = Application()
+df = app.data_frame
 df.load_data(DATA_PATH)
 print(df.get_info_str())
 
@@ -177,8 +179,8 @@ print('\nImprovement of {:0.2f}%.'.format( 100 * (random_accuracy - base_accurac
 
 
 if SAVE_MODEL:
-    with open(FILE , 'wb') as file:
+    with open(MODEL_NAME , 'wb') as file:
         joblib.dump(best_model, file)
-        print("\nModel saved as: " + MODEL_NAME + " to files-folder")
+        print("\nModel saved as: " + MODEL_NAME + " to current folder")
 
 

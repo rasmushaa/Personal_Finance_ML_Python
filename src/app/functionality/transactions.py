@@ -11,7 +11,7 @@ import os
 import json
 from utilis import MyWarningError
 
-FILE = "gategories.json"
+FILE = "_gategories.json"
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 FILE_PATH = os.path.join(ROOT_DIR, "files", FILE)
 

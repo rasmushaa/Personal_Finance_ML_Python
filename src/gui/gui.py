@@ -13,13 +13,14 @@ import json
 import sys
 import os
 import traceback
+import queue
+import threading
 import pandas as pd
 import tkinter as tk
 from tkinter import ttk, messagebox
 from tkinterdnd2 import DND_FILES, TkinterDnD
-from threading import Thread
 
-FILE = "settings.json"
+FILE = "_settings.json"
 ROOT_DIR = os.path.realpath(os.path.join(os.path.dirname(__file__), '..'))
 FILE_PATH = os.path.join(ROOT_DIR, "gui", FILE)
 
@@ -174,8 +175,15 @@ class FrontPage():
         self.data_table.bind('<<TreeviewSelect>>', self.predict_category_action)     
         self.data_table.drop_target_register(DND_FILES)
         self.data_table.dnd_bind('<<Drop>>', self.drop_files_action)   
-        self.data_table.grid(row=2, column=0, columnspan=2, sticky='nesw', padx=20, pady=20)
+        self.data_table.grid(row=2, column=0, columnspan=2, sticky='nesw', padx=20, pady=(10, 5))
         self.gui.grid_rowconfigure(2, weight=1)    
+
+        '''
+        Progress Bar
+        '''
+        self.pbar = ttk.Progressbar(self.gui, mode='determinate', maximum=1000)
+        self.pbar.grid(row=3, column=0, columnspan=2, sticky='ew', padx=20, pady=(0, 5))
+        self.gui.grid_rowconfigure(3, weight=0) 
    
         
     '''
@@ -221,37 +229,55 @@ class FrontPage():
             key = self.entry_box_key.get()
             gogle_sheet = self.entry_box_sheet.get()
             self.app.google_api.auth(key)
+            self.pbar['value'] = 700
+            self.gui.update_idletasks()
             self.app.google_api.write_to_cloud(gogle_sheet)
+            self.pbar['value'] = 1000
+            self.gui.update_idletasks()
+
 
     def train_button_action(self):
-        t1 = Thread(target=self.worker)
-        t1.start()
-
-    def worker(self):
-        try:
+        use_gs_data = messagebox.askyesno('Confirmation', "Pull training data from\nGoogle sheets master file?")
+        if use_gs_data:
             key = self.entry_box_key.get()
             gogle_sheet = self.entry_box_sheet.get()
             self.app.google_api.auth(key)
-            training_data = self.app.google_api.get_from_cloud(gogle_sheet)
-            training_data = training_data.drop(['Category ID', 'Commit date', 'Commit file ID'], axis=1)
-            training_data = training_data[training_data['Receiver'] != '']
-            training_data = training_data.fillna("")
-            train = True
-        except:
-            train = messagebox.askyesno('Confirmation', 
-                                        "Failed to get training data from Google Sheets!\nProceed anyway?",
-                                        icon='warning')
-            training_data = self.app.data_frame.get_df()
+            gs_data = self.app.google_api.get_from_cloud(gogle_sheet)
+            self.app.data_frame.set_data(gs_data)
+            self.data_table.init_table(self.app.data_frame.get_df())
 
-        if train is True:
-            self.train_button['state'] = 'disabled'
-            score = self.app.ai.train_model(training_data)
-            info_str = ("A new AI model created succesfully" +
-                        "\nAn overall accuracy of {:0.2f}% was achieved!".format(score*100))
-            messagebox.showinfo('Info', info_str)
-            self.train_button['state'] = 'normal'
-                
-        
+        self.train_button['state'] = 'disabled'
+        thread_queue = queue.Queue() 
+        t1 = threading.Thread(target=self.app.ai.train_model, args=[thread_queue])
+        t1.start()
+        self.gui.after(200, self.listen_for_result, thread_queue)
+
+    def listen_for_result(self, thread_queue):
+        try:
+            signal = thread_queue.get(0)
+            if list(signal.keys())[0] == 'progress':
+                self.pbar['value'] = signal['progress']
+                self.gui.after(100, self.listen_for_result, thread_queue)
+
+            elif list(signal.keys())[0] == 'accuracy':
+                self.train_button['state'] = 'normal' 
+                self.pbar['value'] = 0
+                info_str = ("A new AI model was created succesfully, " +
+                            "achieving an overall accuracy of {:0.2f}%".format(signal['accuracy']*100))
+                messagebox.showinfo('Info', info_str)     
+
+            elif list(signal.keys())[0] == 'error':
+                self.train_button['state'] = 'normal' 
+                self.pbar['value'] = 0
+                msg = "Training the AI model failed!"
+                raise MyWarningError(msg, signal['error'], fatal=False)
+
+        except queue.Empty:
+            self.gui.after(200, self.listen_for_result, thread_queue)
+            if self.pbar['value'] > 1000:
+                self.pbar['value'] = 0
+            self.pbar['value'] += 1 
+            
 '''
 Shows CSV data in Treeview table
 '''

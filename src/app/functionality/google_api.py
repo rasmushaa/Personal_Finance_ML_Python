@@ -8,6 +8,7 @@ Created on 4 Sep 2022
 
 
 from utilis import MyWarningError
+import pandas as pd
 import gspread
 from google.oauth2.service_account import Credentials
 
@@ -42,7 +43,7 @@ class GoogleAPI():
         try:    
             df = self._app.data_frame.get_df_gs()
             google_sh = self._client.open(sheet)
-            worksheet = google_sh.get_worksheet(0)
+            worksheet = google_sh.worksheet('_dataframe_transactions')
             worksheet.append_rows(df.values.tolist(), 
                                   value_input_option="USER_ENTERED")
                      
@@ -54,9 +55,10 @@ class GoogleAPI():
     def get_from_cloud(self, sheet: str):  
         try:      
             google_sh = self._client.open(sheet)
-            worksheet = google_sh.get_worksheet(0)
-            csv = worksheet.get_all_values()
-            return csv                    
+            worksheet = google_sh.worksheet('_dataframe_transactions')
+            matrix = worksheet.get_all_values()
+            df = pd.DataFrame(data=matrix[1:][:], columns=matrix[0][:])
+            return df                
         except Exception as e:
             msg = "Downloading data from Google Drive failed"
             raise MyWarningError(msg, e, fatal=False)
