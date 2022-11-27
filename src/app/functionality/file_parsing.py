@@ -211,7 +211,7 @@ class DataFrame():
             column_list[2] == 'Selite' and
             column_list[3] == 'Viite/Viesti' and
             column_list[4] == 'Määrä'):
-            return 'POP_BANK'
+            return 'POP_HANDELS_BANK'
         
         #elif (Your file detection code):
             #return 'YourBankCSV'       
