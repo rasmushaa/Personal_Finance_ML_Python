@@ -24,5 +24,19 @@ It has two mtehods: _detect_bank, and _transform2aidf. You must provide your ban
 which is documentented in src/app/functionality/file_parsing.py. It is recommended to use unit testing file csv_parsing_test.py in tools/ 
 to verify the proper working of your code.
 
+## How to build an Exe
+It is possible to build a standalone executeable file, using the PyInstaller librarym which is included in the Conda environment. 
+However, for some reason, running Pyinstaller normally does not produce succesfull results on Mac mini M1 computer and needs a bit hacking.
+
+1. Activate your virtual environment
+2. Set you current folder to build/
+3. Run command in terminal: pyinstaller --windowed --collect-all tkinterdnd2 --add-data="/Users/you/build/brute_include/*:." --icon=logo.icns main.py
+
+This should generate working Application in build/dist. If it does not work, you can try to debugg using terminal version in /build/dist/main.
+The command --collect-all tkinterdnd2 forces Pyinstaller to include file dragging library, used by Tkinter, whihch would other wise not be found. 
+The brute_include/ folder has all same files as buid/, except the main.py. It is used to manually ensure that all files are included into the Application. For this reason, the folder structure of the project is changed to be flatt. Also, absolut paths to filse inside of the program must use sys._MEIPASS to find the path, however, this does not work when running files normally in Visual Studio, and thus, two separed version are needed. 
+If you want to build your own version of AI finance, you must first verify the proper working of your code in IDE from the previous section, and after that, add the new file parsing functions to correct py files in buid/ and also to the build/brute_include/.
+
+
 
 
