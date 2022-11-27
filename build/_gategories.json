@@ -1,0 +1,24 @@
+
+
+{
+  "transaction_types": {
+    "expenditure_list": {
+      "1": "FOOD",
+      "0": "LIVING",
+      "4": "TECHNOLOGY",
+      "5": "HOBBIES",
+      "7": "ENTERTAINMENT",
+      "3": "COMMUTING",
+      "6": "CLOTHING",
+      "2": "HEALTH",
+      "8": "HOUSEHOLD ITEMS",
+      "10": "INVESTING",
+      "9": "UNCATEGORIZED",
+      "404": ""
+    },
+    "income_list": {
+      "11": "SALARY",
+      "13": "OTHER INCOME"
+    }
+  }
+}
