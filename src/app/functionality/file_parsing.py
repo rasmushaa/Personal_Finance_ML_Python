@@ -157,12 +157,10 @@ class DataFrame():
             determine the bank,
             transform to AIDF
             '''
-            self._local_path = path
             df = self._auto_open_file(path)          
-            bank_file_type = self._detect_bank(df)
-            self._bank_file_type = bank_file_type
-            df = self._transform2aidf(df, bank_file_type)
-            self._data_frame = df                                  
+            self._bank_file_type = self._detect_bank(df)
+            self._data_frame = self._transform2aidf(df, self._bank_file_type)  
+            self._local_path = path                             
         except Exception as e:
             msg = "Data could not be loaded!"
             raise MyWarningError(msg, e, fatal=False)
@@ -230,13 +228,13 @@ class DataFrame():
             df = df.astype({'Date':'string','Receiver':'string','Amount':'float','Category':'string'})
             df = df.fillna("")
         
-        elif bank_file_type == 'POP_BANK':       
+        elif bank_file_type == 'POP_HANDELS_BANK':       
             df = df.rename({'Päivämäärä': 'Date', 
                             'Saaja/Maksaja': 'Receiver', 
                             'Määrä': 'Amount'}, axis=1)      
             df = df.drop(['Selite', 'Viite/Viesti'], axis=1)
             df["Category"] = ""
-            df['Amount'] = df['Amount'].str.replace(',', '.')
+            df['Amount'] = df['Amount'].astype(str).str.replace(',', '.')
             df = df.astype({'Amount': 'float'})
             df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y')
             df['Date'] = df['Date'].dt.date.astype(str)
