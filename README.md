@@ -5,6 +5,13 @@ with little work. The overall project uses free Google drive Sheets and Data stu
 to analyse the banking data in the cloud. All files can freely be copied using the links below.
 Although, using AI finance localy is also possible and data can be plotted, for example, in Excell.
 
+<img src="https://github.com/rasmushaa/Personal_Finance_ML_Python/blob/master/images/application.png" width="500">
+
+<img src="https://github.com/rasmushaa/Personal_Finance_ML_Python/blob/master/images/dashboard.png" width="500">
+
+<img src="https://github.com/rasmushaa/Personal_Finance_ML_Python/blob/master/images/drive.png" width="500">
+
+
 ## How to install and run
 1. Copy the Conda environment yaml.file
 (Note, on ARM-Mac the terminal and conda must be X86 compatable,
