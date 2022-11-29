@@ -37,7 +37,8 @@ However, for some reason, running Pyinstaller normally does not produce succesfu
 
 1. Activate your virtual environment
 2. Set you current folder to build/
-3. Run command in terminal: pyinstaller --windowed --collect-all tkinterdnd2 --add-data="/Users/you/build/brute_include/*:." --icon=logo.icns main.py
+3. Run command in terminal: 
+```pyinstaller --windowed --collect-all tkinterdnd2 --add-data="/Users/you/build/brute_include/*:." --icon=logo.icns main.py```
 
 This should generate working Application in build/dist. If it does not work, you can try to debugg using terminal version in /build/dist/main.
 The command --collect-all tkinterdnd2 forces Pyinstaller to include file dragging library, used by Tkinter, whihch would other wise not be found. 
