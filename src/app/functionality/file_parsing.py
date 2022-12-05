@@ -148,7 +148,8 @@ class DataFrame():
         self._encoding = None
         self._separator = ','
                 
-    def load_data(self, path: str):      
+    def load_data(self, path: str): 
+        path = path.strip('{}')    
         try:  
             if not path.endswith('.csv'):
                 raise TypeError("File type is not supported!\nOnly CSV files are allowed...")                     

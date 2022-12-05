@@ -7,7 +7,7 @@ Created on 9 Sep 2022
 
 
 
-from error_handling  import MyWarningError
+from error_handling import MyWarningError
 import pandas as pd
 from datetime import date
 import chardet
@@ -148,7 +148,8 @@ class DataFrame():
         self._encoding = None
         self._separator = ','
                 
-    def load_data(self, path: str):      
+    def load_data(self, path: str): 
+        path = path.strip('{}')    
         try:  
             if not path.endswith('.csv'):
                 raise TypeError("File type is not supported!\nOnly CSV files are allowed...")                     
@@ -157,12 +158,10 @@ class DataFrame():
             determine the bank,
             transform to AIDF
             '''
-            self._local_path = path
             df = self._auto_open_file(path)          
-            bank_file_type = self._detect_bank(df)
-            self._bank_file_type = bank_file_type
-            df = self._transform2aidf(df, bank_file_type)
-            self._data_frame = df                                  
+            self._bank_file_type = self._detect_bank(df)
+            self._data_frame = self._transform2aidf(df, self._bank_file_type)  
+            self._local_path = path                             
         except Exception as e:
             msg = "Data could not be loaded!"
             raise MyWarningError(msg, e, fatal=False)
@@ -213,7 +212,7 @@ class DataFrame():
             column_list[2] == 'Selite' and
             column_list[3] == 'Viite/Viesti' and
             column_list[4] == 'Määrä'):
-            return 'POP_BANK'
+            return 'POP_HANDELS_BANK'
         
         #elif (Your file detection code):
             #return 'YourBankCSV'       
@@ -230,13 +229,13 @@ class DataFrame():
             df = df.astype({'Date':'string','Receiver':'string','Amount':'float','Category':'string'})
             df = df.fillna("")
         
-        elif bank_file_type == 'POP_BANK':       
+        elif bank_file_type == 'POP_HANDELS_BANK':       
             df = df.rename({'Päivämäärä': 'Date', 
                             'Saaja/Maksaja': 'Receiver', 
                             'Määrä': 'Amount'}, axis=1)      
             df = df.drop(['Selite', 'Viite/Viesti'], axis=1)
             df["Category"] = ""
-            df['Amount'] = df['Amount'].str.replace(',', '.')
+            df['Amount'] = df['Amount'].astype(str).str.replace(',', '.')
             df = df.astype({'Amount': 'float'})
             df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y')
             df['Date'] = df['Date'].dt.date.astype(str)

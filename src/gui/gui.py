@@ -272,11 +272,11 @@ class FrontPage():
                 msg = "Training the AI model failed!"
                 raise MyWarningError(msg, signal['error'], fatal=False)
 
-        except queue.Empty:
-            self.gui.after(200, self.listen_for_result, thread_queue)
+        except queue.Empty:       
             if self.pbar['value'] > 1000:
                 self.pbar['value'] = 0
             self.pbar['value'] += 1 
+            self.gui.after(200, self.listen_for_result, thread_queue)
             
 '''
 Shows CSV data in Treeview table
