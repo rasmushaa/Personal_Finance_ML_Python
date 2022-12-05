@@ -115,7 +115,7 @@ class AI():
             # ======================= HYPERPARAMETERS  ==========================
             n_estimators        = [int(x) for x in np.linspace(start = 1, stop = 120, num = 120)]
             max_depth           = [int(x) for x in np.linspace(1, 50, num = 50)]
-            min_samples_split   = [int(x) for x in np.linspace(1, 20, num = 20)]
+            min_samples_split   = [int(x) for x in np.linspace(2, 20, num = 18)]
             min_samples_leaf    = [int(x) for x in np.linspace(1, 10, num = 10)]
             bootstrap           = [True, False]
             chi2_k              = [int(x) for x in np.linspace(start = 50, stop = 200, num = 150)]
@@ -132,11 +132,10 @@ class AI():
                                            n_iter=500, 
                                            cv=3, 
                                            verbose=0, 
-                                           random_state=42, 
-                                           n_jobs =-1)
+                                           random_state=42)
             
             tuned_model.fit(X_train, y_train)
-            best_model = tuned_model.best_estimator_               
+            best_model = tuned_model.best_estimator_              
             y_pred = best_model.predict(X_test)
             accuracy = accuracy_score(y_test, y_pred) 
 

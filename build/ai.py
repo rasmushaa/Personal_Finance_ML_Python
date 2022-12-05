@@ -32,14 +32,15 @@ class AI():
     def __init__(self, app):
         self._app = app
         self._model = None
-        self._active = False
-        self._load_model()
+        self._active = True
                
     def predict_category(self, X: type[pd.DataFrame]) -> list:
         '''
         .predict returns list containing class for
         each X, even in case of one row data frame.
         '''
+        if self._active and self._model is None:
+            self._load_model()
         if self._active:
             category = self._model.predict(X)
             return category
@@ -50,6 +51,8 @@ class AI():
         every class of trained model, and thus 
         .max() value is the predicted category
         '''
+        if self._active and self._model is None:
+            self._load_model()
         if self._active:
             probabs = self._model.predict_proba(X)
             probabs = [max(classes) for classes in probabs]
@@ -70,10 +73,9 @@ class AI():
             with open(FILE , 'rb') as file:
                 model_pipeline = joblib.load(file)
                 self._model = model_pipeline
-                self._active = True
         except Exception as e:
-            msg = ("AI model could not be loaded!\nProceeding without the module...")
             self._active = False
+            msg = ("AI module could not be loaded!\nIt may be corrupted or missing.\nProceeding without...")
             raise MyWarningError(msg, e, fatal=False)
     
     def train_model(self, queue_signal: queue.Queue=None):
@@ -114,7 +116,7 @@ class AI():
             # ======================= HYPERPARAMETERS  ==========================
             n_estimators        = [int(x) for x in np.linspace(start = 1, stop = 120, num = 120)]
             max_depth           = [int(x) for x in np.linspace(1, 50, num = 50)]
-            min_samples_split   = [int(x) for x in np.linspace(1, 20, num = 20)]
+            min_samples_split   = [int(x) for x in np.linspace(2, 20, num = 18)]
             min_samples_leaf    = [int(x) for x in np.linspace(1, 10, num = 10)]
             bootstrap           = [True, False]
             chi2_k              = [int(x) for x in np.linspace(start = 50, stop = 200, num = 150)]
@@ -131,19 +133,19 @@ class AI():
                                            n_iter=500, 
                                            cv=3, 
                                            verbose=0, 
-                                           random_state=42, 
-                                           n_jobs =-1)
+                                           random_state=42)
             
             tuned_model.fit(X_train, y_train)
-            best_model = tuned_model.best_estimator_               
+            best_model = tuned_model.best_estimator_              
             y_pred = best_model.predict(X_test)
             accuracy = accuracy_score(y_test, y_pred) 
+
+            with open(FILE , 'wb') as file:
+                joblib.dump(best_model, file)
+
             if queue_signal is not None: 
                 queue_signal.put({'progress': 1000})
                 queue_signal.put({'accuracy': accuracy}) 
-            
-            with open(FILE , 'wb') as file:
-                joblib.dump(best_model, file)
 
         except Exception as e:
             if queue_signal is not None:
@@ -151,4 +153,3 @@ class AI():
             else:
                 msg = "Training the AI model failed!"
                 raise MyWarningError(msg, e, fatal=False)
-        
