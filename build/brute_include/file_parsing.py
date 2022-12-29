@@ -212,7 +212,7 @@ class DataFrame():
             column_list[2] == 'Selite' and
             column_list[3] == 'Viite/Viesti' and
             column_list[4] == 'Määrä'):
-            return 'POP_HANDELS_BANK'
+            return 'POP_HB'
         
         #elif (Your file detection code):
             #return 'YourBankCSV'       
@@ -229,7 +229,7 @@ class DataFrame():
             df = df.astype({'Date':'string','Receiver':'string','Amount':'float','Category':'string'})
             df = df.fillna("")
         
-        elif bank_file_type == 'POP_HANDELS_BANK':       
+        elif bank_file_type == 'POP_HB':       
             df = df.rename({'Päivämäärä': 'Date', 
                             'Saaja/Maksaja': 'Receiver', 
                             'Määrä': 'Amount'}, axis=1)      
