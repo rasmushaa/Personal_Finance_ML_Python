@@ -1,9 +1,11 @@
 # Personal_Finance_ML_Python
 This is a small python program with a GUI, intended to automate Banking file
 parsing, using ML. You are able to extend the usage to include your own csv-files
-with little work. The overall project uses free Google drive Sheets and Data studio
-to analyse the banking data in the cloud. All files can freely be copied using the links below.
+with little work. The data is analysed using free Google drive Sheets and Data studio in the cloud. 
+All files can freely be copied using the links below.
 Although, using AI finance localy is also possible and data can be plotted, for example, in Excell.
+You may also see this functionality demonstration: https://www.youtube.com/watch?v=fnLAwSYQjt8
+
 
 <img src="https://github.com/rasmushaa/Personal_Finance_ML_Python/blob/master/git_images/app.png" width="500">
 
