@@ -114,7 +114,7 @@ class AI():
             
             # ======================= HYPERPARAMETERS  ==========================
             n_estimators        = [int(x) for x in np.linspace(start = 1, stop = 120, num = 120)]
-            max_depth           = [int(x) for x in np.linspace(1, 50, num = 50)]
+            max_depth           = [int(x) for x in np.linspace(1, 40, num = 40)]
             min_samples_split   = [int(x) for x in np.linspace(2, 20, num = 18)]
             min_samples_leaf    = [int(x) for x in np.linspace(1, 10, num = 10)]
             bootstrap           = [True, False]

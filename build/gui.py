@@ -64,6 +64,7 @@ class GUI(TkinterDnD.Tk, tk.Tk):
             self.settings['sheet_name'] = self.front_page.entry_box_sheet.get()
             self.settings['private_key'] = self.front_page.entry_box_key.get()
             self.settings['window'] = self.winfo_geometry()
+            self.settings['ai_limit'] = self.front_page.slider_value.get()
             json.dump(self.settings, f)
         self.destroy()
         
@@ -143,7 +144,7 @@ class FrontPage():
                                orient='horizontal', 
                                variable=self.slider_value,
                                showvalue=0)
-        self.slider.set(80)
+        self.slider.set(self.gui.settings['ai_limit'])
         l1.grid(row=0, column=2, sticky='w', padx=(5, 0), pady=(0, 4))
         self.slider.grid(row=0, column=2, sticky='ew')
         labelframe.grid_columnconfigure(2, weight=1)

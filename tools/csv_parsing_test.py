@@ -18,7 +18,7 @@ from app import Application
 '''
 Change your own absolut path to your bankinf file!
 '''
-FILE_PATH = "/Users/rasmus/Ohjelmointi/visual_studio/AI_finance/tools/bank_testing_file.csv"
+FILE_PATH = "/Users/rasmus/Downloads/tapahtumat20230601-20230630.csv"
 app = Application()
 app.data_frame.load_data(FILE_PATH )
 df = app.data_frame.get_df()

@@ -214,6 +214,20 @@ class DataFrame():
             column_list[4] == 'Määrä'):
             return 'POP_HB'
         
+        elif (len(column_list) == 11 and
+            column_list[0] == 'Kirjauspäivä' and
+            column_list[1] == 'Arvopäivä' and
+            column_list[2] == 'Määrä EUROA' and
+            column_list[3] == 'Laji' and
+            column_list[4] == 'Selitys' and
+            column_list[5] == 'Saaja/Maksaja' and
+            column_list[6] == 'Saajan tilinumero' and
+            column_list[7] == 'Saajan pankin BIC' and
+            column_list[8] == 'Viite' and
+            column_list[9] == 'Viesti' and
+            column_list[10] == 'Arkistointitunnus'):
+            return 'OP'
+        
         #elif (Your file detection code):
             #return 'YourBankCSV'       
         else:
@@ -239,7 +253,27 @@ class DataFrame():
             df = df.astype({'Amount': 'float'})
             df['Date'] = pd.to_datetime(df['Date'], format='%d.%m.%Y')
             df['Date'] = df['Date'].dt.date.astype(str)
-            df = df.fillna("")           
+            df = df.fillna("")       
+
+        elif bank_file_type == 'OP':       
+            df = df.rename({'Kirjauspäivä': 'Date', 
+                            'Saaja/Maksaja': 'Receiver', 
+                            'Määrä EUROA': 'Amount'}, axis=1)      
+            df = df.drop(['Arvopäivä', 
+                          'Laji',
+                          'Selitys',
+                          'Saajan tilinumero',
+                          'Saajan pankin BIC',
+                          'Viite',
+                          'Viesti',
+                          'Arkistointitunnus'], axis=1)
+            df["Category"] = ""
+            df['Amount'] = df['Amount'].astype(str).str.replace(',', '.')
+            df = df.astype({'Amount': 'float'})
+            df['Date'] = pd.to_datetime(df['Date'], format='%Y-%m-%d')
+            df['Date'] = df['Date'].dt.date.astype(str)
+            df = df.fillna("")      
+            df = df[['Date', 'Receiver', 'Amount', 'Category']]
         
         #if file_type == 'YourBankCSV':
             #Your transform code goes here...         
